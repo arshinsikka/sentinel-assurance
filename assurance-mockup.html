@@ -1,0 +1,1000 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sentinel — Clinical AI Assurance</title>
+<style>
+  :root{
+    --navy:#0f1c2e;
+    --navy-2:#142840;
+    --slate:#1e3a5f;
+    --teal:#2b8a8a;
+    --teal-soft:#e6f3f3;
+    --ink:#1b2733;
+    --muted:#5b6b7b;
+    --line:#e3e8ee;
+    --bg:#f4f6f9;
+    --card:#ffffff;
+    --green:#2e9e6b;
+    --green-bg:#e7f6ee;
+    --amber:#d99a16;
+    --amber-bg:#fdf3df;
+    --orange:#e07b39;
+    --orange-bg:#fcebdf;
+    --red:#c8473f;
+    --red-bg:#fbe9e7;
+    --shadow:0 1px 2px rgba(16,28,46,.04), 0 4px 16px rgba(16,28,46,.06);
+    --shadow-lg:0 12px 40px rgba(16,28,46,.18);
+    --radius:14px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    background:var(--bg);
+    color:var(--ink);
+    font-size:14px;
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+  .app{display:flex;min-height:100vh;}
+
+  /* ---------- Sidebar ---------- */
+  .sidebar{
+    width:248px;
+    background:linear-gradient(180deg,var(--navy) 0%, var(--navy-2) 100%);
+    color:#cdd8e4;
+    display:flex;
+    flex-direction:column;
+    padding:22px 16px;
+    position:sticky;
+    top:0;
+    height:100vh;
+    flex-shrink:0;
+  }
+  .brand{display:flex;align-items:center;gap:11px;padding:4px 8px 22px;}
+  .brand .logo{
+    width:34px;height:34px;border-radius:9px;
+    background:linear-gradient(135deg,var(--teal),#3aa0a0);
+    display:flex;align-items:center;justify-content:center;
+    box-shadow:0 4px 14px rgba(43,138,138,.4);
+    flex-shrink:0;
+  }
+  .brand .logo svg{width:19px;height:19px;}
+  .brand .name{font-size:18px;font-weight:700;color:#fff;letter-spacing:.3px;}
+  .brand .sub{font-size:10.5px;color:#7e93a8;letter-spacing:.4px;text-transform:uppercase;margin-top:1px;}
+  .nav{display:flex;flex-direction:column;gap:4px;margin-top:6px;}
+  .nav button{
+    display:flex;align-items:center;gap:11px;
+    background:transparent;border:none;color:#aebccb;
+    text-align:left;padding:11px 13px;border-radius:9px;
+    font-size:13.5px;font-weight:500;cursor:pointer;width:100%;
+    transition:background .15s,color .15s;font-family:inherit;
+  }
+  .nav button:hover{background:rgba(255,255,255,.06);color:#fff;}
+  .nav button.active{background:rgba(43,138,138,.22);color:#fff;}
+  .nav button.active .ic{color:var(--teal);}
+  .nav .ic{width:18px;height:18px;flex-shrink:0;opacity:.95;}
+  .sidebar .foot{margin-top:auto;padding:14px 10px 2px;font-size:11px;color:#6f8499;border-top:1px solid rgba(255,255,255,.08);}
+  .sidebar .foot strong{color:#9fb1c4;font-weight:600;}
+
+  /* ---------- Main ---------- */
+  .main{flex:1;min-width:0;display:flex;flex-direction:column;}
+  .topbar{
+    background:var(--card);
+    border-bottom:1px solid var(--line);
+    padding:16px 32px;
+    display:flex;align-items:center;justify-content:space-between;
+    position:sticky;top:0;z-index:20;
+    gap:16px;flex-wrap:wrap;
+  }
+  .topbar .ttl h1{font-size:19px;margin:0;font-weight:700;color:var(--navy);}
+  .topbar .ttl p{margin:2px 0 0;font-size:12.5px;color:var(--muted);}
+  .topbar .right{display:flex;align-items:center;gap:14px;}
+  .demo-badge{
+    display:inline-flex;align-items:center;gap:6px;
+    background:var(--amber-bg);color:#9a6b07;
+    border:1px solid #f0d89a;
+    padding:6px 11px;border-radius:20px;font-size:11.5px;font-weight:600;
+  }
+  .demo-badge .dot{width:7px;height:7px;border-radius:50%;background:var(--amber);}
+  .hosp{display:flex;align-items:center;gap:10px;}
+  .hosp .avatar{
+    width:34px;height:34px;border-radius:8px;background:var(--slate);color:#fff;
+    display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;
+  }
+  .hosp .meta{font-size:12px;line-height:1.3;}
+  .hosp .meta b{display:block;color:var(--navy);font-size:12.5px;}
+  .hosp .meta span{color:var(--muted);}
+
+  .content{padding:28px 32px 48px;max-width:1180px;width:100%;}
+  .view{display:none;animation:fade .25s ease;}
+  .view.active{display:block;}
+  @keyframes fade{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:none;}}
+
+  .section-head{margin:0 0 18px;}
+  .section-head h2{font-size:17px;margin:0;color:var(--navy);font-weight:700;}
+  .section-head p{margin:3px 0 0;color:var(--muted);font-size:13px;}
+
+  /* ---------- Cards ---------- */
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);}
+  .kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px;}
+  .kpi{padding:18px 18px 16px;position:relative;overflow:hidden;}
+  .kpi .label{font-size:12px;color:var(--muted);font-weight:600;letter-spacing:.2px;}
+  .kpi .value{font-size:30px;font-weight:750;color:var(--navy);margin-top:7px;line-height:1;}
+  .kpi .note{font-size:11.5px;color:var(--muted);margin-top:8px;}
+  .kpi .accent{position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--slate);}
+  .kpi.attn .accent{background:var(--orange);}
+  .kpi.attn .value{color:var(--orange);}
+  .kpi.green-card{background:var(--green-bg);border-color:#bfe6cf;}
+  .kpi.green-card .accent{background:var(--green);}
+  .kpi.green-card .value{color:var(--green);}
+  .kpi.green-card .label{color:#1f6b48;}
+  .kpi.green-card .note{color:#2f7d57;}
+  .kpi .badge-ok{display:inline-flex;align-items:center;gap:5px;font-size:10.5px;font-weight:700;color:var(--green);background:#fff;border:1px solid #bfe6cf;padding:2px 8px;border-radius:12px;margin-top:9px;}
+
+  /* ---------- Tables ---------- */
+  .table-wrap{overflow-x:auto;}
+  table{width:100%;border-collapse:collapse;font-size:13px;}
+  thead th{
+    text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.5px;
+    color:var(--muted);font-weight:700;padding:13px 16px;border-bottom:1px solid var(--line);
+    background:#fafbfc;white-space:nowrap;
+  }
+  tbody td{padding:14px 16px;border-bottom:1px solid var(--line);vertical-align:middle;}
+  tbody tr:last-child td{border-bottom:none;}
+  tr.clickable{cursor:pointer;transition:background .12s;}
+  tr.clickable:hover{background:#f7fafb;}
+  .sys-name{font-weight:650;color:var(--navy);}
+  .sys-sub{font-size:11.5px;color:var(--muted);}
+
+  .badge{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:20px;font-size:11.5px;font-weight:650;white-space:nowrap;}
+  .b-high{background:var(--orange-bg);color:#b35a1c;}
+  .b-med{background:var(--amber-bg);color:#9a6b07;}
+  .b-low{background:var(--green-bg);color:#1f6b48;}
+  .b-vhigh{background:var(--red-bg);color:#a3322b;}
+
+  .status{display:inline-flex;align-items:center;gap:8px;font-weight:600;font-size:12.5px;}
+  .status .dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
+  .s-healthy{color:#1f6b48;} .s-healthy .dot{background:var(--green);box-shadow:0 0 0 3px var(--green-bg);}
+  .s-drift{color:#9a6b07;} .s-drift .dot{background:var(--amber);box-shadow:0 0 0 3px var(--amber-bg);}
+  .s-action{color:#a3322b;} .s-action .dot{background:var(--red);box-shadow:0 0 0 3px var(--red-bg);animation:pulse 1.8s infinite;}
+  @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(200,71,63,.4);}70%{box-shadow:0 0 0 6px rgba(200,71,63,0);}100%{box-shadow:0 0 0 0 rgba(200,71,63,0);}}
+
+  .band-pill{display:inline-flex;flex-direction:column;gap:1px;}
+  .band-pill .bp-num{font-weight:750;font-size:14px;}
+  .band-pill .bp-band{font-size:11px;font-weight:700;padding:2px 8px;border-radius:12px;align-self:flex-start;margin-top:2px;}
+
+  .stat-tag{font-size:11.5px;font-weight:650;padding:3px 9px;border-radius:12px;}
+  .st-open{background:var(--red-bg);color:#a3322b;}
+  .st-mit{background:var(--amber-bg);color:#9a6b07;}
+  .st-closed{background:var(--green-bg);color:#1f6b48;}
+
+  /* ---------- System Detail ---------- */
+  .detail-head{display:flex;align-items:flex-start;justify-content:space-between;gap:20px;padding:22px 24px;margin-bottom:20px;flex-wrap:wrap;}
+  .detail-head .h-left h2{margin:0;font-size:22px;color:var(--navy);}
+  .detail-head .h-left .vend{color:var(--muted);font-size:13.5px;margin-top:4px;}
+  .detail-head .h-left .tags{display:flex;gap:9px;margin-top:13px;flex-wrap:wrap;}
+  .detail-head .h-right{display:flex;flex-direction:column;align-items:flex-end;gap:8px;}
+  .back-btn{display:inline-flex;align-items:center;gap:6px;background:#fff;border:1px solid var(--line);color:var(--slate);font-weight:600;font-size:12.5px;padding:7px 13px;border-radius:8px;cursor:pointer;font-family:inherit;}
+  .back-btn:hover{background:#f5f8fa;}
+
+  .meta-row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px;}
+  .meta-chip{background:#fff;border:1px solid var(--line);border-radius:10px;padding:9px 14px;font-size:12px;color:var(--muted);box-shadow:var(--shadow);}
+  .meta-chip b{display:block;color:var(--navy);font-size:12.5px;margin-top:1px;font-weight:650;}
+
+  .grid-2{display:grid;grid-template-columns:1.15fr .85fr;gap:20px;align-items:start;}
+  .panel{padding:20px 22px;}
+  .panel h3{margin:0 0 4px;font-size:14.5px;color:var(--navy);font-weight:700;}
+  .panel .ph-sub{font-size:12px;color:var(--muted);margin:0 0 16px;}
+  canvas{width:100%;display:block;}
+
+  .bias-row{margin-bottom:13px;}
+  .bias-row .lab{display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:5px;}
+  .bias-row .lab .name{color:var(--ink);font-weight:550;}
+  .bias-row .lab .val{color:var(--muted);font-weight:650;font-variant-numeric:tabular-nums;}
+  .bias-track{height:13px;background:#eef2f6;border-radius:7px;overflow:hidden;position:relative;}
+  .bias-fill{height:100%;border-radius:7px;background:linear-gradient(90deg,#3aa0a0,var(--teal));transition:width .5s;}
+  .bias-row.flagged .bias-fill{background:linear-gradient(90deg,#e07b39,var(--red));}
+  .bias-row.flagged .name{color:var(--red);font-weight:700;}
+  .cohort-line{font-size:11px;color:var(--muted);margin-top:6px;display:flex;align-items:center;gap:6px;}
+  .cohort-line .swatch{width:14px;height:0;border-top:2px dashed var(--slate);}
+
+  .flag-note{background:var(--red-bg);border:1px solid #f0c4bf;border-left:3px solid var(--red);border-radius:9px;padding:12px 14px;font-size:12.5px;color:#8c2c25;margin-top:16px;line-height:1.5;}
+  .means-box{background:var(--teal-soft);border:1px solid #c4e3e3;border-radius:var(--radius);padding:18px 20px;margin-top:20px;}
+  .means-box h4{margin:0 0 7px;font-size:13.5px;color:#1d5e5e;display:flex;align-items:center;gap:8px;}
+  .means-box p{margin:0;font-size:13px;color:#2a4747;line-height:1.6;}
+
+  /* ---------- Buttons ---------- */
+  .btn{display:inline-flex;align-items:center;gap:8px;background:var(--teal);color:#fff;border:none;font-weight:650;font-size:13.5px;padding:11px 18px;border-radius:9px;cursor:pointer;font-family:inherit;box-shadow:0 4px 14px rgba(43,138,138,.28);transition:transform .1s,background .15s;}
+  .btn:hover{background:#247575;}
+  .btn:active{transform:translateY(1px);}
+  .btn svg{width:16px;height:16px;}
+  .btn-ghost{background:#fff;color:var(--slate);border:1px solid var(--line);box-shadow:var(--shadow);}
+  .btn-ghost:hover{background:#f5f8fa;}
+
+  /* ---------- Calculator ---------- */
+  .calc-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start;}
+  .field{margin-bottom:18px;}
+  .field label{display:block;font-size:12.5px;font-weight:650;color:var(--navy);margin-bottom:7px;}
+  .field select,.field input{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:9px;font-size:13.5px;font-family:inherit;color:var(--ink);background:#fff;}
+  .field select:focus,.field input:focus{outline:none;border-color:var(--teal);box-shadow:0 0 0 3px rgba(43,138,138,.12);}
+  .seg{display:flex;gap:7px;}
+  .seg button{flex:1;padding:9px 0;border:1px solid var(--line);background:#fff;border-radius:8px;font-weight:650;font-size:13px;cursor:pointer;color:var(--muted);font-family:inherit;transition:all .12s;}
+  .seg button.on{background:var(--slate);color:#fff;border-color:var(--slate);}
+  .formula{background:var(--navy);color:#c9d6e4;border-radius:10px;padding:14px 16px;font-size:12.5px;line-height:1.7;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;margin-top:6px;}
+  .formula .hl{color:#5fc9c9;font-weight:600;}
+
+  .result-card{padding:22px 24px;text-align:center;}
+  .result-card .rc-ef{font-size:13px;color:var(--muted);font-weight:600;}
+  .result-card .rc-ef b{color:var(--navy);font-size:15px;}
+  .result-card .rc-num{font-size:58px;font-weight:800;line-height:1;margin:14px 0 6px;}
+  .result-card .rc-band{display:inline-block;font-size:15px;font-weight:750;padding:7px 20px;border-radius:24px;margin:6px 0 10px;}
+  .result-card .rc-treat{font-size:13.5px;color:var(--muted);}
+  .result-card .rc-treat b{color:var(--ink);}
+  .result-bar{display:flex;gap:4px;margin-top:18px;}
+  .result-bar .seg-b{flex:1;height:8px;border-radius:4px;opacity:.28;transition:opacity .2s;}
+  .result-bar .seg-b.on{opacity:1;}
+  .calc-meta{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-top:14px;}
+
+  /* ---------- Evidence Pack Modal ---------- */
+  .overlay{position:fixed;inset:0;background:rgba(15,28,46,.55);backdrop-filter:blur(3px);z-index:100;display:none;align-items:flex-start;justify-content:center;overflow-y:auto;padding:30px 16px;}
+  .overlay.show{display:flex;}
+  .doc{background:#fff;width:100%;max-width:840px;border-radius:12px;box-shadow:var(--shadow-lg);overflow:hidden;}
+  .doc-toolbar{display:flex;justify-content:space-between;align-items:center;padding:13px 22px;background:#f4f6f9;border-bottom:1px solid var(--line);}
+  .doc-toolbar .lbl{font-size:12.5px;color:var(--muted);font-weight:600;}
+  .doc-toolbar .acts{display:flex;gap:9px;}
+  .doc-body{padding:46px 54px 50px;}
+  .doc-letterhead{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:3px solid var(--navy);padding-bottom:18px;margin-bottom:26px;}
+  .doc-letterhead .dl-left .dl-prod{display:flex;align-items:center;gap:9px;}
+  .doc-letterhead .dl-prod .lg{width:30px;height:30px;border-radius:7px;background:linear-gradient(135deg,var(--teal),#3aa0a0);display:flex;align-items:center;justify-content:center;}
+  .doc-letterhead .dl-prod .lg svg{width:17px;height:17px;}
+  .doc-letterhead .dl-prod b{font-size:18px;color:var(--navy);}
+  .doc-letterhead .dl-left .dl-tag{font-size:11px;color:var(--muted);margin-top:5px;letter-spacing:.3px;}
+  .doc-letterhead .dl-right{text-align:right;font-size:11.5px;color:var(--muted);}
+  .doc h1.doc-title{font-size:21px;color:var(--navy);margin:0 0 6px;}
+  .doc .doc-meta-line{font-size:12.5px;color:var(--muted);margin-bottom:22px;}
+  .doc .compliance-stmt{background:var(--teal-soft);border:1px solid #c4e3e3;border-radius:9px;padding:14px 16px;font-size:12.5px;color:#234a4a;line-height:1.6;margin-bottom:26px;}
+  .doc h3.doc-h{font-size:13.5px;color:var(--navy);text-transform:uppercase;letter-spacing:.6px;border-bottom:1px solid var(--line);padding-bottom:7px;margin:26px 0 13px;}
+  .doc table{font-size:11.5px;}
+  .doc thead th{padding:8px 9px;background:#f4f6f9;font-size:10px;}
+  .doc tbody td{padding:8px 9px;}
+  .doc .kpi-strip{display:flex;gap:14px;flex-wrap:wrap;}
+  .doc .kpi-strip .k{flex:1;min-width:150px;border:1px solid var(--line);border-radius:9px;padding:13px 15px;}
+  .doc .kpi-strip .k .kl{font-size:10.5px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.3px;}
+  .doc .kpi-strip .k .kv{font-size:20px;font-weight:750;color:var(--navy);margin-top:4px;}
+  .doc .kpi-strip .k.ok{background:var(--green-bg);border-color:#bfe6cf;}
+  .doc .kpi-strip .k.ok .kv{color:var(--green);}
+  .doc .doc-foot{margin-top:34px;padding-top:16px;border-top:1px solid var(--line);font-size:11px;color:var(--muted);display:flex;justify-content:space-between;}
+  .doc .doc-foot b{color:var(--slate);}
+  .doc .sig-row{display:flex;gap:40px;margin-top:30px;}
+  .doc .sig-row .sig{flex:1;}
+  .doc .sig-row .sig .ln{border-top:1px solid var(--ink);margin-top:34px;padding-top:6px;font-size:11px;color:var(--muted);}
+
+  @media (max-width:880px){
+    .kpi-grid{grid-template-columns:repeat(2,1fr);}
+    .grid-2,.calc-grid{grid-template-columns:1fr;}
+  }
+  @media (max-width:680px){
+    .sidebar{display:none;}
+    .content{padding:20px 16px 40px;}
+    .topbar{padding:14px 16px;}
+    .kpi-grid{grid-template-columns:1fr 1fr;}
+    .doc-body{padding:28px 22px;}
+  }
+
+  /* ---------- Print ---------- */
+  @media print{
+    body *{visibility:hidden;}
+    .overlay,.overlay *{visibility:visible;}
+    /* Expand the scrolling container to full natural height for print so no section is clipped */
+    .overlay{position:static;inset:auto;height:auto;overflow:visible;background:#fff;padding:0;display:block;backdrop-filter:none;}
+    .doc{box-shadow:none;max-width:100%;border-radius:0;overflow:visible;height:auto;}
+    .doc-body{overflow:visible;height:auto;}
+    .doc-toolbar{display:none;}
+    .doc-body{padding:24px 30px;}
+    @page{margin:14mm;}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <!-- ============ SIDEBAR ============ -->
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="logo">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
+      </div>
+      <div>
+        <div class="name">Sentinel</div>
+        <div class="sub">Clinical AI Assurance</div>
+      </div>
+    </div>
+    <nav class="nav">
+      <button data-view="overview" class="active" onclick="nav('overview')">
+        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        Overview
+      </button>
+      <button data-view="detail" onclick="nav('detail')">
+        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m7 14 4-4 3 3 5-6"/></svg>
+        System Detail
+      </button>
+      <button data-view="register" onclick="nav('register')">
+        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v16H4z"/><path d="M4 9h16M9 4v16"/></svg>
+        Risk Register
+      </button>
+      <button data-view="calculator" onclick="nav('calculator')">
+        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M8 6h8M8 10h2M14 10h2M8 14h2M14 14h2M8 18h2M14 18h2"/></svg>
+        Risk Calculator
+      </button>
+    </nav>
+    <div class="foot">
+      <strong>Al Hosn Medical Center</strong><br>
+      Abu Dhabi, UAE<br><br>
+      Independent assurance layer aligned to the DoH Responsible AI Risk Management Protocol.
+    </div>
+  </aside>
+
+  <!-- ============ MAIN ============ -->
+  <div class="main">
+    <header class="topbar">
+      <div class="ttl">
+        <h1 id="pageTitle">AI Assurance Overview</h1>
+        <p id="pageSub">Continuous, vendor-independent monitoring of deployed clinical AI</p>
+      </div>
+      <div class="right">
+        <span class="demo-badge"><span class="dot"></span>Demo · synthetic data</span>
+        <div class="hosp">
+          <div class="avatar">AH</div>
+          <div class="meta">
+            <b>Al Hosn Medical Center</b>
+            <span>Abu Dhabi · Quality &amp; Governance</span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <div class="content">
+
+      <!-- ===== VIEW 1: OVERVIEW ===== -->
+      <section id="view-overview" class="view active">
+        <div class="kpi-grid">
+          <div class="card kpi"><div class="accent"></div>
+            <div class="label">AI Systems Monitored</div>
+            <div class="value">5</div>
+            <div class="note">Across Radiology, Emergency &amp; Operations</div>
+          </div>
+          <div class="card kpi attn"><div class="accent"></div>
+            <div class="label">Systems Needing Attention</div>
+            <div class="value">2</div>
+            <div class="note">1 drift · 1 action required</div>
+          </div>
+          <div class="card kpi"><div class="accent"></div>
+            <div class="label">Open Risk Items</div>
+            <div class="value" id="kpiOpenRisks">6</div>
+            <div class="note">Tracked in the AI Risk Register</div>
+          </div>
+          <div class="card kpi green-card"><div class="accent"></div>
+            <div class="label">AI Ethical Incident Rate</div>
+            <div class="value">8.3%</div>
+            <div class="badge-ok">✓ Under DoH threshold &lt; 15%</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div style="padding:18px 20px 4px;">
+            <h2 style="margin:0;font-size:15.5px;color:var(--navy);">Monitored AI Systems</h2>
+            <p style="margin:3px 0 14px;color:var(--muted);font-size:12.5px;">Select a system to view drift &amp; fairness detail</p>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>System</th><th>Vendor</th><th>Department</th>
+                  <th>Asset Criticality</th><th>Status</th><th>Last Checked</th><th></th>
+                </tr>
+              </thead>
+              <tbody id="overviewRows"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== VIEW 2: SYSTEM DETAIL ===== -->
+      <section id="view-detail" class="view">
+        <button class="back-btn" onclick="nav('overview')">← Back to Overview</button>
+        <div class="card detail-head" style="margin-top:16px;">
+          <div class="h-left">
+            <h2 id="dName">—</h2>
+            <div class="vend" id="dVendor">—</div>
+            <div class="tags" id="dTags"></div>
+          </div>
+          <div class="h-right">
+            <div id="dStatus"></div>
+            <div style="font-size:11.5px;color:var(--muted);" id="dStatusNote"></div>
+          </div>
+        </div>
+
+        <div class="meta-row">
+          <div class="meta-chip">Monitoring mode<b id="dMode">weekly batch</b></div>
+          <div class="meta-chip">Model version<b id="dVersion">v3.2.1</b></div>
+          <div class="meta-chip">Ground truth source<b id="dGT">radiologist confirmation</b></div>
+          <div class="meta-chip">Department<b id="dDept">—</b></div>
+        </div>
+
+        <div class="grid-2">
+          <div class="card panel">
+            <h3>Performance Drift</h3>
+            <p class="ph-sub" id="driftSub">Model accuracy over the last 12 weeks vs. baseline threshold</p>
+            <canvas id="driftChart" width="640" height="320"></canvas>
+          </div>
+          <div class="card panel">
+            <h3>Bias / Fairness Check</h3>
+            <p class="ph-sub">Accuracy across demographic subgroups (Abu Dhabi cohort)</p>
+            <div id="biasBars"></div>
+            <div class="cohort-line"><span class="swatch"></span> Dashed marker = overall cohort accuracy (<span id="cohortVal">—</span>%)</div>
+            <div class="flag-note" id="flagNote"></div>
+          </div>
+        </div>
+
+        <div class="means-box">
+          <h4>🩺 What this means</h4>
+          <p id="meansText"></p>
+        </div>
+      </section>
+
+      <!-- ===== VIEW 3: RISK REGISTER ===== -->
+      <section id="view-register" class="view">
+        <div class="section-head" style="display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap;">
+          <div>
+            <h2>AI Risk Register — Al Hosn Medical Center</h2>
+            <p>Scored per DoH Protocol: Risk Rating = Asset Criticality × (Likelihood × Impact)</p>
+          </div>
+          <button class="btn" onclick="openPack()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M9 15h6M9 18h6"/></svg>
+            Generate DoH Evidence Pack
+          </button>
+        </div>
+        <div class="card">
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Risk ID</th><th>AI System</th><th>Risk Description</th>
+                  <th>L</th><th>I</th><th>Exposure</th><th>Risk Rating</th>
+                  <th>Status</th><th>Owner</th>
+                </tr>
+              </thead>
+              <tbody id="registerRows"></tbody>
+            </table>
+          </div>
+        </div>
+        <p style="font-size:11.5px;color:var(--muted);margin-top:12px;">
+          L = Likelihood (1–5), I = Impact (1–5). Exposure Factor = L × I. Asset Criticality weighting: Very High = 4, High = 3, Medium = 2, Low = 1.
+        </p>
+      </section>
+
+      <!-- ===== VIEW 4: RISK CALCULATOR ===== -->
+      <section id="view-calculator" class="view">
+        <div class="section-head">
+          <h2>Risk Calculator</h2>
+          <p>Compute a DoH-aligned risk rating for any AI system or scenario</p>
+        </div>
+        <div class="calc-grid">
+          <div class="card panel">
+            <div class="field">
+              <label>Asset Criticality</label>
+              <select id="cCrit" onchange="calc()">
+                <option value="4">Very High (4)</option>
+                <option value="3" selected>High (3)</option>
+                <option value="2">Medium (2)</option>
+                <option value="1">Low (1)</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Likelihood (1–5)</label>
+              <div class="seg" id="segL"></div>
+            </div>
+            <div class="field">
+              <label>Impact (1–5)</label>
+              <div class="seg" id="segI"></div>
+            </div>
+            <div class="field" style="margin-bottom:0;">
+              <label>Formula (per DoH Risk Management Protocol)</label>
+              <div class="formula">
+                <span class="hl">Exposure Factor</span> = Likelihood × Impact<br>
+                <span class="hl">Risk Rating</span> = Asset Criticality × Exposure Factor<br>
+                <span style="color:#8aa0b6;">Criticality: Very High=4 · High=3 · Medium=2 · Low=1</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="card result-card">
+            <div class="rc-ef">Exposure Factor: <b id="rEF">—</b> &nbsp;·&nbsp; Criticality weight: <b id="rCW">—</b></div>
+            <div class="rc-num" id="rNum">—</div>
+            <div class="rc-band" id="rBand">—</div>
+            <div class="rc-treat">Required treatment: <b id="rTreat">—</b></div>
+            <div class="result-bar">
+              <div class="seg-b" data-b="0" style="background:var(--green);"></div>
+              <div class="seg-b" data-b="1" style="background:#7bc47f;"></div>
+              <div class="seg-b" data-b="2" style="background:var(--amber);"></div>
+              <div class="seg-b" data-b="3" style="background:var(--orange);"></div>
+              <div class="seg-b" data-b="4" style="background:var(--red);"></div>
+            </div>
+            <div class="calc-meta"><span>Very Low</span><span>Low</span><span>Medium</span><span>High</span><span>Very High</span></div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</div>
+
+<!-- ============ EVIDENCE PACK MODAL ============ -->
+<div class="overlay" id="packOverlay">
+  <div class="doc">
+    <div class="doc-toolbar">
+      <span class="lbl">DoH Responsible AI — Governance Evidence Pack (synthetic demonstration)</span>
+      <div class="acts">
+        <button class="btn" onclick="window.print()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 14h12v8H6z"/></svg>
+          Print / Save as PDF
+        </button>
+        <button class="btn btn-ghost" onclick="closePack()">Close</button>
+      </div>
+    </div>
+    <div class="doc-body" id="docBody"><!-- filled by JS --></div>
+  </div>
+</div>
+
+<script>
+/* ===================== DATA (all synthetic, in-memory) ===================== */
+const HOSPITAL = "Al Hosn Medical Center, Abu Dhabi";
+const INCIDENT_RATE = 8.3;
+const INCIDENT_THRESHOLD = 15;
+
+const systems = [
+  {
+    id:"aidoc", name:"Aidoc BriefCase", vendor:"Aidoc", dept:"Radiology",
+    use:"Chest X-ray triage AI", crit:"High", status:"drift",
+    lastChecked:"22 Jun 2026", mode:"Weekly batch", version:"v3.2.1", gt:"Radiologist confirmation",
+    baseline:90,
+    series:[94.0,93.6,93.1,92.4,91.8,90.7,90.1,89.2,88.6,88.0,87.6,87.0],
+    cohort:91.3,
+    bias:[
+      {name:"UAE National",acc:92.4},
+      {name:"Expat — South Asian",acc:85.1,flag:true},
+      {name:"Expat — Western",acc:92.0},
+      {name:"Age > 65",acc:89.6},
+      {name:"Female patients",acc:91.6}
+    ],
+    means:"Triage accuracy has drifted from 94% to 87% over 12 weeks and has now crossed below the 90% baseline threshold — meaning a growing share of chest X-rays may be mis-prioritised in the worklist. A fairness gap was also detected: accuracy for Expat — South Asian patients is 6.2 points below the cohort average. Both findings affect patient safety and trigger DoH Responsible AI drift-management and fairness-review obligations."
+  },
+  {
+    id:"viz", name:"Viz.ai ANEURYSM", vendor:"Viz.ai", dept:"Radiology / Neuro",
+    use:"CT brain hemorrhage detection", crit:"High", status:"action",
+    lastChecked:"23 Jun 2026", mode:"Continuous (per-study)", version:"v2.7.0", gt:"Neuroradiologist confirmation",
+    baseline:90,
+    series:[93.1,92.4,91.6,90.2,89.0,88.1,87.2,86.6,86.0,85.6,85.2,85.0],
+    cohort:88.4,
+    bias:[
+      {name:"UAE National",acc:90.1},
+      {name:"Expat — South Asian",acc:87.0},
+      {name:"Expat — Western",acc:89.6},
+      {name:"Age > 65",acc:83.9,flag:true},
+      {name:"Female patients",acc:88.8}
+    ],
+    means:"Detection accuracy has fallen below the 90% safety baseline for several consecutive weeks, with sensitivity for time-critical brain hemorrhage now in the action-required zone — a missed or delayed flag here carries severe patient-safety consequences. Accuracy for patients aged over 65 sits 4.5 points below cohort average. The system requires immediate clinical review and vendor escalation under the DoH Protocol."
+  },
+  {
+    id:"lunit", name:"Lunit INSIGHT MMG", vendor:"Lunit", dept:"Radiology",
+    use:"Mammography screening AI", crit:"High", status:"healthy",
+    lastChecked:"22 Jun 2026", mode:"Weekly batch", version:"v4.1.2", gt:"Radiologist + biopsy outcome",
+    baseline:90,
+    series:[93.0,93.3,92.8,93.4,93.0,92.7,93.1,92.9,93.4,93.0,92.8,93.2],
+    cohort:93.0,
+    bias:[
+      {name:"UAE National",acc:93.4},
+      {name:"Expat — South Asian",acc:92.1},
+      {name:"Expat — Western",acc:93.2},
+      {name:"Age > 65",acc:92.6},
+      {name:"Female patients",acc:93.0}
+    ],
+    means:"Screening accuracy is stable and comfortably above the 90% baseline across the full 12-week window. Subgroup accuracy is consistent with no fairness gap beyond normal variation. The system is operating within DoH Responsible AI expectations; routine weekly monitoring continues."
+  },
+  {
+    id:"edtriage", name:"ED Triage Assist", vendor:"Internal Build", dept:"Emergency",
+    use:"Emergency department triage support", crit:"High", status:"healthy",
+    lastChecked:"23 Jun 2026", mode:"Daily batch", version:"v1.4.0", gt:"Final ED disposition",
+    baseline:88,
+    series:[90.2,90.5,89.8,90.3,89.6,90.1,89.7,90.2,89.9,90.4,90.0,89.8],
+    cohort:90.0,
+    bias:[
+      {name:"UAE National",acc:90.4},
+      {name:"Expat — South Asian",acc:89.2},
+      {name:"Expat — Western",acc:90.1},
+      {name:"Age > 65",acc:88.9},
+      {name:"Female patients",acc:90.0}
+    ],
+    means:"Triage-support accuracy is steady above its 88% baseline, with balanced performance across subgroups. As an internally built decision-support tool, the main residual risk is human-oversight (automation bias) rather than model performance — this is tracked in the Risk Register and addressed through clinician override audits."
+  },
+  {
+    id:"flow", name:"FlowPredict", vendor:"FlowPredict", dept:"Operations",
+    use:"Appointment no-show prediction", crit:"Medium", status:"healthy",
+    lastChecked:"21 Jun 2026", mode:"Weekly batch", version:"v2.0.3", gt:"Actual attendance records",
+    baseline:80,
+    series:[85.0,84.6,85.2,84.8,85.0,84.7,85.1,84.9,85.3,84.8,85.0,84.9],
+    cohort:85.0,
+    bias:[
+      {name:"UAE National",acc:85.3},
+      {name:"Expat — South Asian",acc:84.4},
+      {name:"Expat — Western",acc:85.1},
+      {name:"Age > 65",acc:84.6},
+      {name:"Female patients",acc:85.0}
+    ],
+    means:"No-show prediction accuracy is stable above its 80% baseline with no material subgroup disparity. As an operational (non-clinical) model with Medium asset criticality, its risk exposure is low; monitoring confirms it remains fit for scheduling-optimisation use under DoH governance."
+  }
+];
+
+const critWeight = {"Very High":4,"High":3,"Medium":2,"Low":1};
+const sysById = id => systems.find(s=>s.id===id);
+
+/* Risk register rows — Risk Rating computed from system criticality × (L×I) */
+const risks = [
+  {id:"R-001", sysId:"aidoc",   desc:"Performance drift — triage accuracy below 90% baseline", L:4, I:4, status:"Mitigating", owner:"Head of Radiology"},
+  {id:"R-002", sysId:"aidoc",   desc:"Fairness gap — accuracy 6.2pp lower for Expat (South Asian) cohort", L:3, I:4, status:"Open", owner:"Chief AI Officer"},
+  {id:"R-003", sysId:"viz",     desc:"Reduced sensitivity for time-critical hemorrhage detection", L:4, I:5, status:"Open", owner:"Head of Radiology"},
+  {id:"R-004", sysId:"edtriage",desc:"Human-oversight gap — automation bias in ED triage decisions", L:3, I:5, status:"Mitigating", owner:"Dr. Quality Lead"},
+  {id:"R-005", sysId:"lunit",   desc:"Patient data privacy / PDPL exposure in image-sharing pipeline", L:2, I:5, status:"Open", owner:"Data Protection Officer"},
+  {id:"R-006", sysId:"flow",    desc:"Model degradation in no-show prediction affecting clinic scheduling", L:3, I:2, status:"Mitigating", owner:"Head of Operations"}
+];
+
+/* ===================== BANDS ===================== */
+function bandFor(rr){
+  if(rr<=10) return {idx:0, name:"Very Low",  treat:"No action required", color:"var(--green)",  bg:"var(--green-bg)",  fg:"#1f6b48", cls:"b-low"};
+  if(rr<=20) return {idx:1, name:"Low",       treat:"Treat case-by-case", color:"#7bc47f",        bg:"var(--green-bg)",  fg:"#1f6b48", cls:"b-low"};
+  if(rr<=40) return {idx:2, name:"Medium",    treat:"Needs treatment",    color:"var(--amber)",   bg:"var(--amber-bg)",  fg:"#9a6b07", cls:"b-med"};
+  if(rr<=60) return {idx:3, name:"High",      treat:"Must be treated",    color:"var(--orange)",  bg:"var(--orange-bg)", fg:"#b35a1c", cls:"b-high"};
+  return       {idx:4, name:"Very High", treat:"Must be avoided",    color:"var(--red)",     bg:"var(--red-bg)",    fg:"#a3322b", cls:"b-vhigh"};
+}
+function critClass(c){ return c==="High"?"b-high":c==="Medium"?"b-med":c==="Very High"?"b-vhigh":"b-low"; }
+function statusInfo(st){
+  if(st==="healthy") return {cls:"s-healthy", label:"Healthy", note:"Operating within thresholds"};
+  if(st==="drift")   return {cls:"s-drift",   label:"Drift Detected", note:"Accuracy below baseline"};
+  return {cls:"s-action", label:"Action Required", note:"Immediate review needed"};
+}
+
+/* ===================== NAVIGATION ===================== */
+const titles = {
+  overview:["AI Assurance Overview","Continuous, vendor-independent monitoring of deployed clinical AI"],
+  detail:["System Detail","Performance drift and fairness diagnostics"],
+  register:["AI Risk Register","DoH-aligned risk scoring and governance evidence"],
+  calculator:["Risk Calculator","Interactive DoH risk-rating tool"]
+};
+function nav(view){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.getElementById('view-'+view).classList.add('active');
+  document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('active', b.dataset.view===view));
+  document.getElementById('pageTitle').textContent = titles[view][0];
+  document.getElementById('pageSub').textContent = titles[view][1];
+  window.scrollTo(0,0);
+}
+
+/* ===================== OVERVIEW TABLE ===================== */
+function renderOverview(){
+  const tb = document.getElementById('overviewRows');
+  tb.innerHTML = systems.map(s=>{
+    const si = statusInfo(s.status);
+    return `<tr class="clickable" onclick="openDetail('${s.id}')">
+      <td><div class="sys-name">${s.name}</div><div class="sys-sub">${s.use}</div></td>
+      <td>${s.vendor}</td>
+      <td>${s.dept}</td>
+      <td><span class="badge ${critClass(s.crit)}">${s.crit}</span></td>
+      <td><span class="status ${si.cls}"><span class="dot"></span>${si.label}</span></td>
+      <td style="color:var(--muted);white-space:nowrap;">${s.lastChecked}</td>
+      <td style="color:var(--teal);font-weight:700;">›</td>
+    </tr>`;
+  }).join('');
+  // open risks count = non-closed
+  document.getElementById('kpiOpenRisks').textContent = risks.filter(r=>r.status!=="Closed").length;
+}
+
+/* ===================== SYSTEM DETAIL ===================== */
+let currentSys = systems[0];
+function openDetail(id){
+  currentSys = sysById(id);
+  nav('detail');
+  renderDetail();
+}
+function renderDetail(){
+  const s = currentSys, si = statusInfo(s.status);
+  document.getElementById('dName').textContent = s.name;
+  document.getElementById('dVendor').textContent = s.vendor + " · " + s.use;
+  document.getElementById('dTags').innerHTML =
+    `<span class="badge ${critClass(s.crit)}">Asset Criticality: ${s.crit}</span>
+     <span class="badge b-low" style="background:#eef2f6;color:var(--slate);">${s.dept}</span>`;
+  document.getElementById('dStatus').innerHTML = `<span class="status ${si.cls}" style="font-size:14px;"><span class="dot"></span>${si.label}</span>`;
+  document.getElementById('dStatusNote').textContent = si.note;
+  document.getElementById('dMode').textContent = s.mode;
+  document.getElementById('dVersion').textContent = s.version;
+  document.getElementById('dGT').textContent = s.gt;
+  document.getElementById('dDept').textContent = s.dept;
+  document.getElementById('driftSub').textContent = `Model accuracy over the last 12 weeks vs. ${s.baseline}% baseline threshold`;
+  drawDrift(s);
+  renderBias(s);
+  document.getElementById('meansText').textContent = s.means;
+}
+
+function drawDrift(s){
+  const cv = document.getElementById('driftChart');
+  const dpr = window.devicePixelRatio || 1;
+  const W = cv.clientWidth || 640, H = 320;
+  cv.width = W*dpr; cv.height = H*dpr;
+  const ctx = cv.getContext('2d');
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  ctx.clearRect(0,0,W,H);
+
+  const padL=46, padR=18, padT=18, padB=42;
+  const plotW = W-padL-padR, plotH = H-padT-padB;
+  const yMin=82, yMax=96;
+  const x = i => padL + (plotW*i/(s.series.length-1));
+  const y = v => padT + plotH*(1-(v-yMin)/(yMax-yMin));
+
+  // gridlines + y labels
+  ctx.font = "11px -apple-system,Segoe UI,sans-serif";
+  ctx.textBaseline="middle";
+  for(let v=82; v<=96; v+=2){
+    const yy=y(v);
+    ctx.strokeStyle="#eef2f6"; ctx.lineWidth=1;
+    ctx.beginPath(); ctx.moveTo(padL,yy); ctx.lineTo(W-padR,yy); ctx.stroke();
+    ctx.fillStyle="#9aa7b4"; ctx.textAlign="right";
+    ctx.fillText(v+"%", padL-8, yy);
+  }
+  // baseline threshold (dashed)
+  const by=y(s.baseline);
+  ctx.save();
+  ctx.setLineDash([6,5]); ctx.strokeStyle="#c8473f"; ctx.lineWidth=1.5;
+  ctx.beginPath(); ctx.moveTo(padL,by); ctx.lineTo(W-padR,by); ctx.stroke();
+  ctx.restore();
+  ctx.fillStyle="#c8473f"; ctx.textAlign="left"; ctx.font="11px -apple-system,Segoe UI,sans-serif";
+  ctx.fillText(`Baseline ${s.baseline}%`, padL+4, by-9);
+
+  // x labels (weeks)
+  ctx.fillStyle="#9aa7b4"; ctx.textAlign="center"; ctx.textBaseline="top";
+  s.series.forEach((v,i)=>{
+    if(i%2===0||i===s.series.length-1){
+      ctx.fillText("W"+(i+1), x(i), H-padB+10);
+    }
+  });
+
+  // area fill under line
+  const grad = ctx.createLinearGradient(0,padT,0,padT+plotH);
+  grad.addColorStop(0,"rgba(43,138,138,.18)");
+  grad.addColorStop(1,"rgba(43,138,138,0)");
+  ctx.beginPath();
+  ctx.moveTo(x(0),y(s.series[0]));
+  s.series.forEach((v,i)=>ctx.lineTo(x(i),y(v)));
+  ctx.lineTo(x(s.series.length-1), padT+plotH);
+  ctx.lineTo(x(0), padT+plotH);
+  ctx.closePath(); ctx.fillStyle=grad; ctx.fill();
+
+  // line
+  ctx.beginPath();
+  ctx.moveTo(x(0),y(s.series[0]));
+  s.series.forEach((v,i)=>ctx.lineTo(x(i),y(v)));
+  ctx.strokeStyle="#2b8a8a"; ctx.lineWidth=2.4; ctx.lineJoin="round";
+  ctx.stroke();
+
+  // points (red below baseline)
+  s.series.forEach((v,i)=>{
+    const below = v < s.baseline;
+    ctx.beginPath();
+    ctx.arc(x(i),y(v),below?4.6:3.6,0,Math.PI*2);
+    ctx.fillStyle = below ? "#c8473f" : "#2b8a8a";
+    ctx.fill();
+    ctx.strokeStyle="#fff"; ctx.lineWidth=1.6; ctx.stroke();
+  });
+
+  // axis titles
+  ctx.fillStyle="#6b7a89"; ctx.font="11px -apple-system,Segoe UI,sans-serif";
+  ctx.textAlign="center"; ctx.textBaseline="alphabetic";
+  ctx.fillText("Week", padL+plotW/2, H-4);
+  ctx.save();
+  ctx.translate(13, padT+plotH/2); ctx.rotate(-Math.PI/2);
+  ctx.fillText("Accuracy %", 0, 0);
+  ctx.restore();
+}
+
+function renderBias(s){
+  document.getElementById('cohortVal').textContent = s.cohort.toFixed(1);
+  const max = 100, min = 80; // visual scale
+  const scale = v => Math.max(2,((v-min)/(max-min))*100);
+  document.getElementById('biasBars').innerHTML = s.bias.map(b=>`
+    <div class="bias-row ${b.flag?'flagged':''}">
+      <div class="lab"><span class="name">${b.name}</span><span class="val">${b.acc.toFixed(1)}%</span></div>
+      <div class="bias-track"><div class="bias-fill" style="width:${scale(b.acc)}%"></div></div>
+    </div>`).join('');
+
+  const flagged = s.bias.find(b=>b.flag);
+  const note = document.getElementById('flagNote');
+  if(flagged){
+    const gap = (s.cohort - flagged.acc).toFixed(1);
+    note.style.display="block";
+    note.innerHTML = `<b>⚠ Fairness gap detected:</b> accuracy for <b>${flagged.name}</b> is ${gap} percentage points below cohort average — flagged for DoH fairness review.`;
+  } else {
+    note.style.display="block";
+    note.style.background="var(--green-bg)";
+    note.style.borderColor="#bfe6cf";
+    note.style.borderLeftColor="var(--green)";
+    note.style.color="#1f6b48";
+    note.innerHTML = `<b>✓ No fairness gap:</b> subgroup accuracy is within normal variation of the cohort average — no DoH fairness action required.`;
+  }
+  if(flagged){
+    note.style.background=""; note.style.borderColor=""; note.style.borderLeftColor=""; note.style.color="";
+  }
+}
+
+/* ===================== RISK REGISTER ===================== */
+function computeRisk(r){
+  const s = sysById(r.sysId);
+  const cw = critWeight[s.crit];
+  const ef = r.L * r.I;
+  const rr = cw * ef;
+  return {sys:s, cw, ef, rr, band:bandFor(rr)};
+}
+function renderRegister(){
+  const tb = document.getElementById('registerRows');
+  tb.innerHTML = risks.map(r=>{
+    const c = computeRisk(r);
+    const stCls = r.status==="Open"?"st-open":r.status==="Mitigating"?"st-mit":"st-closed";
+    return `<tr>
+      <td style="font-weight:700;color:var(--slate);white-space:nowrap;">${r.id}</td>
+      <td><div class="sys-name" style="font-size:12.5px;">${c.sys.name}</div><div class="sys-sub">${c.sys.crit} criticality</div></td>
+      <td style="max-width:280px;">${r.desc}</td>
+      <td style="text-align:center;font-weight:650;">${r.L}</td>
+      <td style="text-align:center;font-weight:650;">${r.I}</td>
+      <td style="text-align:center;font-weight:700;color:var(--navy);">${c.ef}</td>
+      <td>
+        <div class="band-pill">
+          <span class="bp-num" style="color:${c.band.color};">${c.rr}</span>
+          <span class="bp-band" style="background:${c.band.bg};color:${c.band.fg};">${c.band.name} · ${c.band.treat}</span>
+        </div>
+      </td>
+      <td><span class="stat-tag ${stCls}">${r.status}</span></td>
+      <td style="white-space:nowrap;">${r.owner}</td>
+    </tr>`;
+  }).join('');
+}
+
+/* ===================== CALCULATOR ===================== */
+let calcL=3, calcI=4;
+function buildSegs(){
+  const sl=document.getElementById('segL'), si=document.getElementById('segI');
+  sl.innerHTML=""; si.innerHTML="";
+  for(let n=1;n<=5;n++){
+    const b1=document.createElement('button'); b1.textContent=n; b1.dataset.n=n;
+    b1.className = n===calcL?'on':''; b1.onclick=()=>{calcL=n; buildSegs(); calc();};
+    sl.appendChild(b1);
+    const b2=document.createElement('button'); b2.textContent=n; b2.dataset.n=n;
+    b2.className = n===calcI?'on':''; b2.onclick=()=>{calcI=n; buildSegs(); calc();};
+    si.appendChild(b2);
+  }
+}
+function calc(){
+  const cw = parseInt(document.getElementById('cCrit').value,10);
+  const ef = calcL*calcI;
+  const rr = cw*ef;
+  const band = bandFor(rr);
+  document.getElementById('rEF').textContent = ef + " (" + calcL + "×" + calcI + ")";
+  document.getElementById('rCW').textContent = cw;
+  document.getElementById('rNum').textContent = rr;
+  document.getElementById('rNum').style.color = band.color;
+  const rb = document.getElementById('rBand');
+  rb.textContent = band.name;
+  rb.style.background = band.bg; rb.style.color = band.fg;
+  document.getElementById('rTreat').textContent = band.treat;
+  document.querySelectorAll('.result-bar .seg-b').forEach(el=>{
+    el.classList.toggle('on', parseInt(el.dataset.b,10)===band.idx);
+  });
+}
+
+/* ===================== EVIDENCE PACK ===================== */
+function openPack(){
+  const today = new Date().toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});
+  const attn = systems.filter(s=>s.status!=='healthy');
+  const sysRows = systems.map(s=>{
+    const si=statusInfo(s.status);
+    return `<tr>
+      <td><b>${s.name}</b></td><td>${s.vendor}</td><td>${s.dept}</td>
+      <td>${s.crit}</td><td>${si.label}</td><td>${s.lastChecked}</td></tr>`;
+  }).join('');
+  const riskRows = risks.map(r=>{
+    const c=computeRisk(r);
+    return `<tr>
+      <td>${r.id}</td><td>${c.sys.name}</td><td>${r.desc}</td>
+      <td style="text-align:center;">${r.L}</td><td style="text-align:center;">${r.I}</td>
+      <td style="text-align:center;">${c.ef}</td>
+      <td style="text-align:center;"><b>${c.rr}</b></td>
+      <td>${c.band.name}</td><td>${r.status}</td><td>${r.owner}</td></tr>`;
+  }).join('');
+
+  document.getElementById('docBody').innerHTML = `
+    <div class="doc-letterhead">
+      <div class="dl-left">
+        <div class="dl-prod">
+          <span class="lg"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg></span>
+          <b>Sentinel</b>
+        </div>
+        <div class="dl-tag">Independent Clinical AI Assurance</div>
+      </div>
+      <div class="dl-right">
+        Document ref: SENT-EP-2026-0142<br>
+        Status: <b>Synthetic demonstration</b><br>
+        Confidential — for governance use
+      </div>
+    </div>
+
+    <h1 class="doc-title">DoH Responsible AI — Governance Evidence Pack</h1>
+    <div class="doc-meta-line"><b>${HOSPITAL}</b> &nbsp;·&nbsp; Generated: ${today} &nbsp;·&nbsp; Reporting period: 12-week rolling window</div>
+
+    <div class="compliance-stmt">
+      This evidence pack maps to the <b>Abu Dhabi Department of Health (DoH) Responsible AI Standard</b> and the
+      <b>DoH AI Risk Management Protocol</b>. It documents the hospital's deployed clinical AI estate, continuous
+      performance &amp; fairness monitoring, and the corresponding risk register, scored as
+      <i>Risk Rating = Asset Criticality × (Likelihood × Impact)</i>. All figures shown are synthetic demonstration data.
+    </div>
+
+    <h3 class="doc-h">1 · Governance Summary</h3>
+    <div class="kpi-strip">
+      <div class="k"><div class="kl">AI Systems Monitored</div><div class="kv">5</div></div>
+      <div class="k"><div class="kl">Systems Needing Attention</div><div class="kv">${attn.length}</div></div>
+      <div class="k"><div class="kl">Open Risk Items</div><div class="kv">${risks.filter(r=>r.status!=='Closed').length}</div></div>
+      <div class="k ok"><div class="kl">AI Ethical Incident Rate</div><div class="kv">${INCIDENT_RATE}%</div><div style="font-size:10.5px;color:#2f7d57;margin-top:3px;">Within DoH threshold &lt; ${INCIDENT_THRESHOLD}%</div></div>
+    </div>
+
+    <h3 class="doc-h">2 · Deployed Clinical AI Systems</h3>
+    <table>
+      <thead><tr><th>System</th><th>Vendor</th><th>Department</th><th>Asset Criticality</th><th>Status</th><th>Last Checked</th></tr></thead>
+      <tbody>${sysRows}</tbody>
+    </table>
+    <p style="font-size:11px;color:var(--muted);margin-top:8px;">Systems requiring attention: <b>${attn.map(a=>a.name).join(', ')}</b>.</p>
+
+    <h3 class="doc-h">3 · AI Risk Register Summary</h3>
+    <table>
+      <thead><tr><th>ID</th><th>System</th><th>Risk</th><th>L</th><th>I</th><th>EF</th><th>Rating</th><th>Band</th><th>Status</th><th>Owner</th></tr></thead>
+      <tbody>${riskRows}</tbody>
+    </table>
+
+    <h3 class="doc-h">4 · Attestation</h3>
+    <p style="font-size:12px;color:var(--ink);line-height:1.6;">
+      The monitoring evidence and risk ratings in this pack were produced by Sentinel as an independent assurance layer
+      operating across all clinical AI vendors deployed at ${HOSPITAL}. Identified risks have assigned owners and
+      treatment requirements consistent with their DoH risk band.
+    </p>
+    <div class="sig-row">
+      <div class="sig"><div class="ln">Chief Medical Officer / Quality Director</div></div>
+      <div class="sig"><div class="ln">Chief AI Officer</div></div>
+    </div>
+
+    <div class="doc-foot">
+      <span>Prepared by <b>Sentinel</b> — independent clinical AI assurance</span>
+      <span>Aligned to DoH Responsible AI Risk Management Protocol · Synthetic demo</span>
+    </div>
+  `;
+  document.getElementById('packOverlay').classList.add('show');
+}
+function closePack(){ document.getElementById('packOverlay').classList.remove('show'); }
+document.getElementById('packOverlay').addEventListener('click',e=>{ if(e.target.id==='packOverlay') closePack(); });
+document.addEventListener('keydown',e=>{ if(e.key==='Escape') closePack(); });
+
+/* ===================== INIT ===================== */
+renderOverview();
+renderRegister();
+renderDetail();
+buildSegs();
+calc();
+window.addEventListener('resize',()=>{ if(document.getElementById('view-detail').classList.contains('active')) drawDrift(currentSys); });
+</script>
+</body>
+</html>
