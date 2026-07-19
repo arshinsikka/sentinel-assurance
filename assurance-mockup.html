@@ -238,39 +238,152 @@
   .result-bar .seg-b.on{opacity:1;}
   .calc-meta{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-top:14px;}
 
+  /* ---------- Vendor Data Upload (demo simulation) ---------- */
+  .upload-card{
+    border:1px solid rgba(20,184,166,.45);
+    box-shadow:0 1px 2px rgba(16,28,46,.04),0 6px 20px rgba(20,184,166,.10);
+    padding:20px 22px;margin-bottom:22px;
+  }
+  .upload-card .uc-head{display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap;}
+  .upload-card .uc-head h2{margin:0;font-size:15.5px;color:var(--navy);font-weight:700;}
+  .upload-card .uc-head .uc-pill{font-size:10.5px;font-weight:700;color:#0f766e;background:#ccfbf1;border:1px solid #99f6e4;padding:2px 9px;border-radius:12px;}
+
+  .dropzone{
+    border:2px dashed #14B8A6;border-radius:12px;
+    background:linear-gradient(rgba(19,78,74,.30),rgba(19,78,74,.30)), var(--navy);
+    padding:30px 20px;text-align:center;cursor:pointer;
+    transition:background .18s,border-color .18s,transform .12s;
+  }
+  .dropzone:hover{border-color:#2dd4bf;}
+  .dropzone.dragover{
+    background:linear-gradient(rgba(19,78,74,.55),rgba(19,78,74,.55)), var(--navy);
+    border-color:#5eead4;transform:scale(1.006);
+  }
+  .dropzone .dz-arrow{
+    width:40px;height:40px;margin:0 auto 12px;border-radius:50%;
+    border:1.5px solid rgba(20,184,166,.55);color:#14B8A6;
+    display:flex;align-items:center;justify-content:center;font-size:20px;line-height:1;
+  }
+  .dropzone .dz-main{color:#94A3B8;font-size:14px;font-weight:600;}
+  .dropzone .dz-sub{color:#64748B;font-size:11.5px;margin-top:5px;}
+
+  .or-div{display:flex;align-items:center;gap:12px;margin:14px 0;color:#94a3b8;font-size:11px;text-transform:uppercase;letter-spacing:.5px;}
+  .or-div:before,.or-div:after{content:"";flex:1;height:1px;background:var(--line);}
+  .uc-actions{text-align:center;}
+  .uc-note{font-size:10px;color:#64748B;text-align:center;margin-top:12px;}
+
+  /* Processing card */
+  .proc-card{
+    background:linear-gradient(180deg,var(--navy) 0%,var(--navy-2) 100%);
+    border:1px solid rgba(20,184,166,.35);border-radius:var(--radius);
+    padding:24px 26px;margin-bottom:22px;box-shadow:0 10px 30px rgba(15,28,46,.18);
+  }
+  .proc-card .pc-head{display:flex;align-items:center;justify-content:space-between;gap:14px;border-bottom:1px solid rgba(255,255,255,.10);padding-bottom:13px;margin-bottom:14px;flex-wrap:wrap;}
+  .proc-card .pc-title{color:#fff;font-size:14.5px;font-weight:700;}
+  .proc-card .pc-file{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11.5px;color:#5eead4;background:rgba(20,184,166,.12);border:1px solid rgba(20,184,166,.3);padding:3px 10px;border-radius:6px;word-break:break-all;}
+  .proc-steps{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12.5px;line-height:1.6;}
+  .pstep{display:flex;align-items:flex-start;gap:9px;color:#94A3B8;padding:6px 0;opacity:0;transform:translateY(-3px);animation:stepIn .3s ease forwards;}
+  @keyframes stepIn{to{opacity:1;transform:none;}}
+  .pstep .mark{width:14px;flex-shrink:0;color:#14B8A6;}
+  .pstep.active .txt{animation:pulseTxt 1s ease-in-out infinite;}
+  .pstep .cursor{display:none;width:7px;height:13px;background:#14B8A6;margin-left:6px;vertical-align:-2px;}
+  .pstep.active .cursor{display:inline-block;animation:blink 1s steps(1) infinite;}
+  @keyframes pulseTxt{0%,100%{opacity:1;}50%{opacity:.55;}}
+  @keyframes blink{0%,50%{opacity:1;}51%,100%{opacity:0;}}
+  .pstep.done{color:#22C55E;}
+  .pstep.done .mark{color:#22C55E;}
+  .proc-bar{height:4px;background:rgba(255,255,255,.08);border-radius:3px;margin-top:18px;overflow:hidden;}
+  .proc-bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,#14B8A6,#5eead4);border-radius:3px;transition:width .7s linear;}
+  .proc-success{
+    margin-top:18px;background:rgba(20,184,166,.14);border:1px solid rgba(20,184,166,.45);
+    color:#5eead4;border-radius:9px;padding:13px 15px;font-size:13px;font-weight:600;
+    opacity:0;animation:stepIn .35s ease forwards;
+  }
+
+  /* Post-upload persistent banner */
+  .loaded-banner{
+    display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;
+    background:#fff;border:1px solid var(--line);border-left:3px solid var(--teal);
+    border-radius:10px;padding:10px 15px;margin-bottom:20px;font-size:12px;color:var(--muted);
+    box-shadow:var(--shadow);
+  }
+  .loaded-banner .lb-l{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+  .loaded-banner .lb-check{color:var(--green);font-weight:700;}
+  .loaded-banner .lb-file{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--navy);font-weight:600;}
+  .loaded-banner button{background:none;border:none;color:var(--teal);font-weight:650;font-size:12px;cursor:pointer;font-family:inherit;text-decoration:underline;padding:0;}
+  .loaded-banner button:hover{color:#1d6f6f;}
+
   /* ---------- Evidence Pack Modal ---------- */
   .overlay{position:fixed;inset:0;background:rgba(15,28,46,.55);backdrop-filter:blur(3px);z-index:100;display:none;align-items:flex-start;justify-content:center;overflow-y:auto;padding:30px 16px;}
   .overlay.show{display:flex;}
-  .doc{background:#fff;width:100%;max-width:840px;border-radius:12px;box-shadow:var(--shadow-lg);overflow:hidden;}
+  .doc{background:#FFFFFF;width:100%;max-width:880px;border-radius:10px;box-shadow:var(--shadow-lg);overflow:hidden;}
   .doc-toolbar{display:flex;justify-content:space-between;align-items:center;padding:13px 22px;background:#f4f6f9;border-bottom:1px solid var(--line);}
   .doc-toolbar .lbl{font-size:12.5px;color:var(--muted);font-weight:600;}
   .doc-toolbar .acts{display:flex;gap:9px;}
-  .doc-body{padding:46px 54px 50px;}
-  .doc-letterhead{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:3px solid var(--navy);padding-bottom:18px;margin-bottom:26px;}
-  .doc-letterhead .dl-left .dl-prod{display:flex;align-items:center;gap:9px;}
-  .doc-letterhead .dl-prod .lg{width:30px;height:30px;border-radius:7px;background:linear-gradient(135deg,var(--teal),#3aa0a0);display:flex;align-items:center;justify-content:center;}
-  .doc-letterhead .dl-prod .lg svg{width:17px;height:17px;}
-  .doc-letterhead .dl-prod b{font-size:18px;color:var(--navy);}
-  .doc-letterhead .dl-left .dl-tag{font-size:11px;color:var(--muted);margin-top:5px;letter-spacing:.3px;}
-  .doc-letterhead .dl-right{text-align:right;font-size:11.5px;color:var(--muted);}
-  .doc h1.doc-title{font-size:21px;color:var(--navy);margin:0 0 6px;}
-  .doc .doc-meta-line{font-size:12.5px;color:var(--muted);margin-bottom:22px;}
-  .doc .compliance-stmt{background:var(--teal-soft);border:1px solid #c4e3e3;border-radius:9px;padding:14px 16px;font-size:12.5px;color:#234a4a;line-height:1.6;margin-bottom:26px;}
-  .doc h3.doc-h{font-size:13.5px;color:var(--navy);text-transform:uppercase;letter-spacing:.6px;border-bottom:1px solid var(--line);padding-bottom:7px;margin:26px 0 13px;}
-  .doc table{font-size:11.5px;}
-  .doc thead th{padding:8px 9px;background:#f4f6f9;font-size:10px;}
-  .doc tbody td{padding:8px 9px;}
-  .doc .kpi-strip{display:flex;gap:14px;flex-wrap:wrap;}
-  .doc .kpi-strip .k{flex:1;min-width:150px;border:1px solid var(--line);border-radius:9px;padding:13px 15px;}
-  .doc .kpi-strip .k .kl{font-size:10.5px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.3px;}
-  .doc .kpi-strip .k .kv{font-size:20px;font-weight:750;color:var(--navy);margin-top:4px;}
-  .doc .kpi-strip .k.ok{background:var(--green-bg);border-color:#bfe6cf;}
-  .doc .kpi-strip .k.ok .kv{color:var(--green);}
-  .doc .doc-foot{margin-top:34px;padding-top:16px;border-top:1px solid var(--line);font-size:11px;color:var(--muted);display:flex;justify-content:space-between;}
-  .doc .doc-foot b{color:var(--slate);}
-  .doc .sig-row{display:flex;gap:40px;margin-top:30px;}
-  .doc .sig-row .sig{flex:1;}
-  .doc .sig-row .sig .ln{border-top:1px solid var(--ink);margin-top:34px;padding-top:6px;font-size:11px;color:var(--muted);}
+
+  /* ---- Formal regulatory document: white page, dark text ---- */
+  .doc-body{
+    padding:44px 40px 46px;
+    background:#FFFFFF;
+    color:#374151;
+    font-family:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    font-size:12.5px;line-height:1.62;
+  }
+  .doc-body h1,.doc-body h2,.doc-body h3,.doc-body h4,.doc-body strong,.doc-body b{color:#0F172A;}
+
+  /* Letterhead */
+  .lh{display:flex;justify-content:space-between;align-items:flex-start;gap:30px;flex-wrap:wrap;}
+  .lh-left .lh-entity{font-size:19px;font-weight:700;color:#0F172A;letter-spacing:.2px;line-height:1.3;}
+  .lh-left .lh-sub{font-size:11.5px;color:#6B7280;margin-top:5px;}
+  .lh-right{font-size:11px;min-width:280px;}
+  .lh-right .mrow{display:flex;justify-content:space-between;gap:18px;padding:2.5px 0;}
+  .lh-right .mrow .ml{color:#6B7280;white-space:nowrap;}
+  .lh-right .mrow .mv{color:#0F172A;font-weight:600;text-align:right;}
+  .lh-rule{border:none;border-top:2px solid #0F172A;margin:16px 0 0;}
+  .doc-title2{font-size:16px;font-weight:700;color:#0F172A;text-align:center;letter-spacing:.5px;text-transform:uppercase;margin:24px 0 5px;}
+  .doc-title2-sub{text-align:center;font-size:11.5px;color:#6B7280;margin-bottom:8px;}
+
+  /* Sections */
+  .sec{margin-top:26px;}
+  .sec-h{font-size:12.5px;font-weight:700;color:#0F172A;text-transform:uppercase;letter-spacing:.7px;border-bottom:1px solid #E5E7EB;padding-bottom:6px;margin:0 0 12px;}
+  .sec p{margin:0 0 10px;color:#374151;font-size:12.5px;line-height:1.65;text-align:justify;}
+  .sec p:last-child{margin-bottom:0;}
+
+  /* Document tables */
+  .dtable{width:100%;border-collapse:collapse;font-size:11px;border:1px solid #E5E7EB;}
+  .dtable thead th{background:#F3F4F6;color:#0F172A;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;padding:9px 10px;border:1px solid #E5E7EB;text-align:left;white-space:nowrap;}
+  .dtable tbody td{padding:8px 10px;border:1px solid #E5E7EB;color:#374151;vertical-align:top;background:transparent;}
+  .dtable tbody tr:last-child td{border:1px solid #E5E7EB;}
+  .dtable tbody tr:nth-child(even) td{background:#FAFAFA;}
+  .dtable .c{text-align:center;}
+  .dtable .nm{font-weight:600;color:#0F172A;}
+  .tbl-note{font-size:10.5px;color:#6B7280;margin-top:7px;}
+
+  /* Metric box */
+  .metric-box{border:1px solid #E5E7EB;border-radius:6px;overflow:hidden;}
+  .metric-box .mb-h{background:#F3F4F6;padding:9px 14px;font-size:11px;font-weight:700;color:#0F172A;border-bottom:1px solid #E5E7EB;text-transform:uppercase;letter-spacing:.4px;}
+  .metric-box .mb-grid{display:flex;flex-wrap:wrap;}
+  .metric-box .mb-cell{flex:1;min-width:140px;padding:13px 14px;border-right:1px solid #E5E7EB;}
+  .metric-box .mb-cell:last-child{border-right:none;}
+  .metric-box .mb-l{font-size:10px;color:#6B7280;text-transform:uppercase;letter-spacing:.4px;font-weight:600;}
+  .metric-box .mb-v{font-size:17px;font-weight:700;color:#0F172A;margin-top:4px;}
+  .metric-box .mb-v.ok{color:#15803D;}
+  .metric-box .mb-note{font-size:10.5px;color:#6B7280;padding:9px 14px;border-top:1px solid #E5E7EB;background:#FAFAFA;}
+
+  .treat-yes{color:#B91C1C;font-weight:700;}
+  .treat-mon{color:#B45309;font-weight:700;}
+  .treat-no{color:#6B7280;font-weight:600;}
+
+  /* Signature block */
+  .sig-block{display:flex;gap:46px;margin-top:26px;}
+  .sig-block .sg{flex:1;}
+  .sig-block .sg .sg-line{border-top:1px solid #0F172A;margin-top:48px;}
+  .sig-block .sg .sg-role{font-size:11.5px;font-weight:700;color:#0F172A;margin-top:8px;}
+  .sig-block .sg .sg-fields{font-size:10.5px;color:#6B7280;margin-top:10px;line-height:2;}
+  .doc-prepared{margin-top:28px;padding-top:12px;border-top:1px solid #E5E7EB;font-size:10.5px;color:#6B7280;text-align:center;line-height:1.7;}
+
+  /* Repeating print footer (fallback where @page margin boxes are unsupported) */
+  .print-footer{display:none;}
 
   @media (max-width:880px){
     .kpi-grid{grid-template-columns:repeat(2,1fr);}
@@ -288,13 +401,33 @@
   @media print{
     body *{visibility:hidden;}
     .overlay,.overlay *{visibility:visible;}
-    /* Expand the scrolling container to full natural height for print so no section is clipped */
-    .overlay{position:static;inset:auto;height:auto;overflow:visible;background:#fff;padding:0;display:block;backdrop-filter:none;}
-    .doc{box-shadow:none;max-width:100%;border-radius:0;overflow:visible;height:auto;}
-    .doc-body{overflow:visible;height:auto;}
-    .doc-toolbar{display:none;}
-    .doc-body{padding:24px 30px;}
-    @page{margin:14mm;}
+    /* Hide all dashboard chrome entirely */
+    .sidebar,.topbar,.content,.doc-toolbar{display:none !important;}
+    /* Expand the scrolling container to full natural height so no section is clipped */
+    .overlay{position:static;inset:auto;height:auto;overflow:visible;background:#FFFFFF;padding:0;display:block;backdrop-filter:none;}
+    .doc{box-shadow:none;max-width:100%;width:100%;border-radius:0;overflow:visible;height:auto;}
+    .doc-body{padding:0 0 26px;overflow:visible;height:auto;background:#FFFFFF;}
+    /* Keep tables and blocks from splitting mid-row */
+    .dtable tr,.dtable thead,.metric-box,.sig-block,.lh{page-break-inside:avoid;break-inside:avoid;}
+    .dtable thead{display:table-header-group;}
+    .sec-h,.doc-title2{page-break-after:avoid;break-after:avoid;}
+    .sec{page-break-inside:auto;}
+    /* Ensure table fills/greys actually print */
+    .dtable thead th,.dtable tbody tr:nth-child(even) td,.metric-box .mb-h,.metric-box .mb-note{
+      -webkit-print-color-adjust:exact;print-color-adjust:exact;
+    }
+    /* Repeating footer: hospital name + page number */
+    .print-footer{
+      display:flex;justify-content:space-between;
+      position:fixed;bottom:0;left:0;right:0;
+      font-size:9pt;color:#6B7280;border-top:1px solid #E5E7EB;
+      padding-top:5px;background:#FFFFFF;
+    }
+    @page{
+      margin:20mm;
+      @bottom-left{content:"Al Hosn Medical Center, Abu Dhabi";font-size:9pt;color:#6B7280;}
+      @bottom-right{content:"Page " counter(page) " of " counter(pages);font-size:9pt;color:#6B7280;}
+    }
   }
 </style>
 </head>
@@ -359,6 +492,52 @@
 
       <!-- ===== VIEW 1: OVERVIEW ===== -->
       <section id="view-overview" class="view active">
+
+        <!-- ===== Vendor data upload (simulated demo flow) ===== -->
+        <div class="card upload-card" id="uploadCard">
+          <div class="uc-head">
+            <h2>Connect Vendor Data</h2>
+            <span class="uc-pill">Demo simulation</span>
+          </div>
+          <div class="dropzone" id="dropzone">
+            <div class="dz-arrow">↑</div>
+            <div class="dz-main">Drop vendor AI output file here</div>
+            <div class="dz-sub">Accepts CSV, JSON — demo processes any file format</div>
+          </div>
+          <div class="or-div">or</div>
+          <div class="uc-actions">
+            <button class="btn" type="button" id="browseBtn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M17 8l-5-5-5 5"/><path d="M12 3v12"/></svg>
+              Browse file
+            </button>
+            <input type="file" id="fileInput" hidden>
+          </div>
+          <div class="uc-note">Demo mode — any file triggers a simulated analysis of Al Hosn Medical Center's AI systems</div>
+        </div>
+
+        <!-- ===== Processing animation ===== -->
+        <div class="proc-card" id="procCard" style="display:none;">
+          <div class="pc-head">
+            <span class="pc-title">Analysing vendor output</span>
+            <span class="pc-file" id="procFile">—</span>
+          </div>
+          <div class="proc-steps" id="procStepList"></div>
+          <div class="proc-bar"><i id="procBarFill"></i></div>
+          <div class="proc-success" id="procSuccess" style="display:none;">
+            ✓ Analysis complete — 5 AI systems assessed, 2 require attention. Risk Register and Evidence Pack ready.
+          </div>
+        </div>
+
+        <!-- ===== Post-upload banner ===== -->
+        <div class="loaded-banner" id="loadedBanner" style="display:none;">
+          <span class="lb-l">
+            <span class="lb-check">✓</span>
+            <span>Last analysis: <span class="lb-file" id="lbFile">—</span> — processed <span id="lbDate">—</span></span>
+          </span>
+          <button type="button" id="resetDemoBtn">Reset demo</button>
+        </div>
+
+        <div id="dashContent">
         <div class="kpi-grid">
           <div class="card kpi"><div class="accent"></div>
             <div class="label">AI Systems Monitored</div>
@@ -399,6 +578,7 @@
             </table>
           </div>
         </div>
+        </div><!-- /#dashContent -->
       </section>
 
       <!-- ===== VIEW 2: SYSTEM DETAIL ===== -->
@@ -900,86 +1080,133 @@ function calc(){
 }
 
 /* ===================== EVIDENCE PACK ===================== */
+function treatmentCell(band){
+  if(band.idx>=3) return `<span class="treat-yes">Yes</span>`;      // High / Very High
+  if(band.idx===2) return `<span class="treat-mon">Monitor</span>`; // Medium
+  if(band.idx===1) return `<span class="treat-no">Case-by-case</span>`;
+  return `<span class="treat-no">No</span>`;
+}
 function openPack(){
-  const today = new Date().toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});
+  const d = new Date();
+  const pad = n => String(n).padStart(2,'0');
+  const today = `${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()}`;
   const attn = systems.filter(s=>s.status!=='healthy');
   const sysRows = systems.map(s=>{
     const si=statusInfo(s.status);
     return `<tr>
-      <td><b>${s.name}</b></td><td>${s.vendor}</td><td>${s.dept}</td>
-      <td>${s.crit}</td><td>${si.label}</td><td>${s.lastChecked}</td></tr>`;
+      <td class="nm">${s.name}</td><td>${s.vendor}</td><td>${s.dept}</td>
+      <td>${s.crit}</td><td>${si.label}</td><td>${s.lastChecked}</td>
+      <td class="c">Clause 4.2</td></tr>`;
   }).join('');
   const riskRows = risks.map(r=>{
     const c=computeRisk(r);
     return `<tr>
-      <td>${r.id}</td><td>${c.sys.name}</td><td>${r.desc}</td>
-      <td style="text-align:center;">${r.L}</td><td style="text-align:center;">${r.I}</td>
-      <td style="text-align:center;">${c.ef}</td>
-      <td style="text-align:center;"><b>${c.rr}</b></td>
-      <td>${c.band.name}</td><td>${r.status}</td><td>${r.owner}</td></tr>`;
+      <td class="nm">${r.id}</td><td>${c.sys.name}</td><td>${r.desc}</td>
+      <td class="c">${r.L}</td><td class="c">${r.I}</td>
+      <td class="c">${c.ef}</td>
+      <td class="c"><b>${c.rr}</b></td>
+      <td>${c.band.name}</td>
+      <td class="c">${treatmentCell(c.band)}</td>
+      <td>${r.status}</td><td>${r.owner}</td></tr>`;
   }).join('');
 
   document.getElementById('docBody').innerHTML = `
-    <div class="doc-letterhead">
-      <div class="dl-left">
-        <div class="dl-prod">
-          <span class="lg"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg></span>
-          <b>Sentinel</b>
+    <!-- ===== Letterhead ===== -->
+    <div class="lh">
+      <div class="lh-left">
+        <div class="lh-entity">Al Hosn Medical Center, Abu Dhabi</div>
+        <div class="lh-sub">Licensed Healthcare Entity — Department of Health Abu Dhabi</div>
+      </div>
+      <div class="lh-right">
+        <div class="mrow"><span class="ml">Document Type:</span><span class="mv">AI Governance Evidence Pack</span></div>
+        <div class="mrow"><span class="ml">Reference Number:</span><span class="mv">AGEP-2026-001</span></div>
+        <div class="mrow"><span class="ml">Reporting Period:</span><span class="mv">Q2 2026 (April–June)</span></div>
+        <div class="mrow"><span class="ml">Generated:</span><span class="mv">${today}</span></div>
+        <div class="mrow"><span class="ml">Version:</span><span class="mv">1.0</span></div>
+      </div>
+    </div>
+    <hr class="lh-rule">
+
+    <div class="doc-title2">AI Governance Evidence Pack</div>
+    <div class="doc-title2-sub">Prepared for submission to the Department of Health — Abu Dhabi &nbsp;·&nbsp; Synthetic demonstration data</div>
+
+    <!-- ===== 1. Regulatory basis ===== -->
+    <div class="sec">
+      <h3 class="sec-h">1. Regulatory Basis and Scope</h3>
+      <p>This governance evidence pack has been prepared in accordance with the Department of Health Abu Dhabi Responsible Artificial Intelligence (AI) Standard (DoH/ST/DDGO/RAI/V1/2025), binding on all licensed healthcare entities from October 2025, and the accompanying Responsible AI Risk Management Protocol. It documents the ongoing performance monitoring, bias assessment, and risk management activities required under: Clause 3.1 (AI Risk Management), Clause 4.2 (Ongoing Monitoring and Performance Management), Clause 5.1 (Fairness and Bias Controls), and Clause 6.2 (Accountability and Audit Trail). This pack covers all clinical AI systems deployed at Al Hosn Medical Center as of the reporting date.</p>
+    </div>
+
+    <!-- ===== 2. Systems overview ===== -->
+    <div class="sec">
+      <h3 class="sec-h">2. AI Systems Overview</h3>
+      <table class="dtable">
+        <thead><tr>
+          <th>System</th><th>Vendor</th><th>Department</th><th>Asset Criticality</th>
+          <th>Status</th><th>Last Checked</th><th>Clause Reference</th>
+        </tr></thead>
+        <tbody>${sysRows}</tbody>
+      </table>
+      <div class="tbl-note">Systems currently requiring attention: <b>${attn.map(a=>a.name).join(', ')}</b> (${attn.length} of ${systems.length}).</div>
+    </div>
+
+    <!-- ===== 3. Ethical incident rate KPI ===== -->
+    <div class="sec">
+      <h3 class="sec-h">3. AI Ethical Incident Rate</h3>
+      <div class="metric-box">
+        <div class="mb-h">KPI-001 — AI Ethical Incident Rate</div>
+        <div class="mb-grid">
+          <div class="mb-cell"><div class="mb-l">Metric</div><div class="mb-v" style="font-size:12.5px;line-height:1.4;">AI Ethical<br>Incident Rate</div></div>
+          <div class="mb-cell"><div class="mb-l">Reporting Period Value</div><div class="mb-v">${INCIDENT_RATE}%</div></div>
+          <div class="mb-cell"><div class="mb-l">DoH Threshold</div><div class="mb-v">&lt; ${INCIDENT_THRESHOLD}%</div></div>
+          <div class="mb-cell"><div class="mb-l">Status</div><div class="mb-v ok">COMPLIANT</div></div>
         </div>
-        <div class="dl-tag">Independent Clinical AI Assurance</div>
-      </div>
-      <div class="dl-right">
-        Document ref: SENT-EP-2026-0142<br>
-        Status: <b>Synthetic demonstration</b><br>
-        Confidential — for governance use
+        <div class="mb-note">Clause reference: Clause 3.1 — Risk Management Protocol, KPI-001. Reporting period: Q2 2026 (April–June).</div>
       </div>
     </div>
 
-    <h1 class="doc-title">DoH Responsible AI — Governance Evidence Pack</h1>
-    <div class="doc-meta-line"><b>${HOSPITAL}</b> &nbsp;·&nbsp; Generated: ${today} &nbsp;·&nbsp; Reporting period: 12-week rolling window</div>
-
-    <div class="compliance-stmt">
-      This evidence pack maps to the <b>Abu Dhabi Department of Health (DoH) Responsible AI Standard</b> and the
-      <b>DoH AI Risk Management Protocol</b>. It documents the hospital's deployed clinical AI estate, continuous
-      performance &amp; fairness monitoring, and the corresponding risk register, scored as
-      <i>Risk Rating = Asset Criticality × (Likelihood × Impact)</i>. All figures shown are synthetic demonstration data.
+    <!-- ===== 4. Risk register ===== -->
+    <div class="sec">
+      <h3 class="sec-h">4. Risk Register Summary</h3>
+      <table class="dtable">
+        <thead><tr>
+          <th>Risk ID</th><th>AI System</th><th>Risk Description</th>
+          <th>L</th><th>I</th><th>EF</th><th>Risk Rating</th><th>Band</th>
+          <th>Treatment Required</th><th>Status</th><th>Owner</th>
+        </tr></thead>
+        <tbody>${riskRows}</tbody>
+      </table>
+      <div class="tbl-note">L = Likelihood (1–5); I = Impact (1–5); EF = Exposure Factor (L × I). Risk Rating = Asset Criticality (Very High 4 / High 3 / Medium 2 / Low 1) × Exposure Factor. Bands: Very Low ≤ 10, Low ≤ 20, Medium ≤ 40, High ≤ 60, Very High &gt; 60.</div>
     </div>
 
-    <h3 class="doc-h">1 · Governance Summary</h3>
-    <div class="kpi-strip">
-      <div class="k"><div class="kl">AI Systems Monitored</div><div class="kv">5</div></div>
-      <div class="k"><div class="kl">Systems Needing Attention</div><div class="kv">${attn.length}</div></div>
-      <div class="k"><div class="kl">Open Risk Items</div><div class="kv">${risks.filter(r=>r.status!=='Closed').length}</div></div>
-      <div class="k ok"><div class="kl">AI Ethical Incident Rate</div><div class="kv">${INCIDENT_RATE}%</div><div style="font-size:10.5px;color:#2f7d57;margin-top:3px;">Within DoH threshold &lt; ${INCIDENT_THRESHOLD}%</div></div>
+    <!-- ===== 5. Assurance statement ===== -->
+    <div class="sec">
+      <h3 class="sec-h">5. Independent Assurance Statement</h3>
+      <p>This evidence pack has been generated by Sentinel, an independent clinical AI assurance platform operating across all AI vendors deployed at Al Hosn Medical Center. Performance data, drift metrics, and risk ratings have been computed independently of the AI vendors assessed. Sentinel operates as a neutral third-party layer with no commercial relationship with the assessed AI vendors. This pack does not constitute a formal audit opinion. It is intended to support the hospital's internal governance processes and regulatory reporting obligations under the DoH Responsible AI Standard.</p>
     </div>
 
-    <h3 class="doc-h">2 · Deployed Clinical AI Systems</h3>
-    <table>
-      <thead><tr><th>System</th><th>Vendor</th><th>Department</th><th>Asset Criticality</th><th>Status</th><th>Last Checked</th></tr></thead>
-      <tbody>${sysRows}</tbody>
-    </table>
-    <p style="font-size:11px;color:var(--muted);margin-top:8px;">Systems requiring attention: <b>${attn.map(a=>a.name).join(', ')}</b>.</p>
-
-    <h3 class="doc-h">3 · AI Risk Register Summary</h3>
-    <table>
-      <thead><tr><th>ID</th><th>System</th><th>Risk</th><th>L</th><th>I</th><th>EF</th><th>Rating</th><th>Band</th><th>Status</th><th>Owner</th></tr></thead>
-      <tbody>${riskRows}</tbody>
-    </table>
-
-    <h3 class="doc-h">4 · Attestation</h3>
-    <p style="font-size:12px;color:var(--ink);line-height:1.6;">
-      The monitoring evidence and risk ratings in this pack were produced by Sentinel as an independent assurance layer
-      operating across all clinical AI vendors deployed at ${HOSPITAL}. Identified risks have assigned owners and
-      treatment requirements consistent with their DoH risk band.
-    </p>
-    <div class="sig-row">
-      <div class="sig"><div class="ln">Chief Medical Officer / Quality Director</div></div>
-      <div class="sig"><div class="ln">Chief AI Officer</div></div>
+    <!-- ===== 6. Signatures ===== -->
+    <div class="sec">
+      <h3 class="sec-h">6. Authorisation</h3>
+      <div class="sig-block">
+        <div class="sg">
+          <div class="sg-line"></div>
+          <div class="sg-role">Chief Medical Officer / Quality Director</div>
+          <div class="sg-fields">Name: ______________________________<br>Date: ______________________________</div>
+        </div>
+        <div class="sg">
+          <div class="sg-line"></div>
+          <div class="sg-role">Chief AI Officer / Digital Health Lead</div>
+          <div class="sg-fields">Name: ______________________________<br>Date: ______________________________</div>
+        </div>
+      </div>
+      <div class="doc-prepared">
+        Document prepared by: Sentinel — Independent Clinical AI Assurance &nbsp;|&nbsp; sentinel-assurance &nbsp;|&nbsp; Confidential — For regulatory purposes only
+      </div>
     </div>
 
-    <div class="doc-foot">
-      <span>Prepared by <b>Sentinel</b> — independent clinical AI assurance</span>
-      <span>Aligned to DoH Responsible AI Risk Management Protocol · Synthetic demo</span>
+    <div class="print-footer">
+      <span>Al Hosn Medical Center, Abu Dhabi</span>
+      <span>AGEP-2026-001 · Confidential</span>
     </div>
   `;
   document.getElementById('packOverlay').classList.add('show');
@@ -987,6 +1214,122 @@ function openPack(){
 function closePack(){ document.getElementById('packOverlay').classList.remove('show'); }
 document.getElementById('packOverlay').addEventListener('click',e=>{ if(e.target.id==='packOverlay') closePack(); });
 document.addEventListener('keydown',e=>{ if(e.key==='Escape') closePack(); });
+
+/* ============ VENDOR UPLOAD — SIMULATED ANALYSIS ============
+   Demo only: file contents are never read or parsed. Only the
+   filename is used, purely for display. Nothing is persisted. */
+const PROC_STEPS = [
+  "📂 Reading vendor output file...",
+  "🔍 Identifying AI systems and vendor signatures...",
+  "📊 Computing performance drift across 12-week baseline...",
+  "⚖️ Running demographic bias analysis across patient subgroups...",
+  "🛡️ Applying DoH Risk Management Protocol — computing Risk Ratings...",
+  "📋 Generating Risk Register and DoH Evidence Pack..."
+];
+let procTimers = [], procRunning = false;
+const T = (fn,ms) => procTimers.push(setTimeout(fn,ms));
+function clearProcTimers(){ procTimers.forEach(clearTimeout); procTimers = []; }
+
+function startProcessing(filename){
+  if(procRunning) return;
+  procRunning = true;
+
+  const uploadCard = document.getElementById('uploadCard');
+  const procCard   = document.getElementById('procCard');
+  const dash       = document.getElementById('dashContent');
+  const list       = document.getElementById('procStepList');
+  const bar        = document.getElementById('procBarFill');
+  const success    = document.getElementById('procSuccess');
+
+  uploadCard.style.display = 'none';
+  document.getElementById('loadedBanner').style.display = 'none';
+  dash.style.display = 'none';
+  document.getElementById('procFile').textContent = filename;
+  list.innerHTML = '';
+  success.style.display = 'none';
+  bar.style.width = '0%';
+  procCard.style.display = 'block';
+
+  PROC_STEPS.forEach((txt,i)=>{
+    // step appears (in-progress: pulsing text + blinking cursor)
+    T(()=>{
+      const el = document.createElement('div');
+      el.className = 'pstep active';
+      el.id = 'pstep-' + i;
+      el.innerHTML = `<span class="mark">▸</span><span class="txt">${txt}<span class="cursor"></span></span>`;
+      list.appendChild(el);
+    }, i * 800);
+    // step completes (turns green with a ✓)
+    T(()=>{
+      const el = document.getElementById('pstep-' + i);
+      if(!el) return;
+      el.classList.remove('active');
+      el.classList.add('done');
+      el.querySelector('.mark').textContent = '✓';
+      el.querySelector('.txt').innerHTML = txt;
+      bar.style.width = (((i+1)/PROC_STEPS.length)*100) + '%';
+    }, (i+1) * 800);
+  });
+
+  // success banner at 5.2s
+  T(()=>{ success.style.display = 'block'; }, 5200);
+
+  // reveal the populated dashboard 1s later
+  T(()=>{
+    procCard.style.display = 'none';
+    dash.style.display = '';
+    showLoadedBanner(filename);
+    procRunning = false;
+  }, 6200);
+}
+
+function showLoadedBanner(filename){
+  const d = new Date(), pad = n => String(n).padStart(2,'0');
+  document.getElementById('lbFile').textContent = filename;
+  document.getElementById('lbDate').textContent =
+    `${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()}`;
+  document.getElementById('loadedBanner').style.display = 'flex';
+}
+
+function resetDemo(){
+  clearProcTimers();
+  procRunning = false;
+  document.getElementById('procCard').style.display = 'none';
+  document.getElementById('loadedBanner').style.display = 'none';
+  document.getElementById('uploadCard').style.display = '';
+  document.getElementById('dashContent').style.display = '';
+  document.getElementById('fileInput').value = '';
+  nav('overview');
+}
+
+(function initUpload(){
+  const dz = document.getElementById('dropzone');
+  const fi = document.getElementById('fileInput');
+
+  ['dragenter','dragover'].forEach(ev=>dz.addEventListener(ev,e=>{
+    e.preventDefault(); e.stopPropagation(); dz.classList.add('dragover');
+  }));
+  ['dragleave','dragend'].forEach(ev=>dz.addEventListener(ev,e=>{
+    e.preventDefault(); e.stopPropagation(); dz.classList.remove('dragover');
+  }));
+  dz.addEventListener('drop',e=>{
+    e.preventDefault(); e.stopPropagation();
+    dz.classList.remove('dragover');
+    const f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+    startProcessing(f ? f.name : 'vendor-export.csv');  // filename only — contents ignored
+  });
+
+  dz.addEventListener('click',()=>fi.click());
+  document.getElementById('browseBtn').addEventListener('click',e=>{ e.stopPropagation(); fi.click(); });
+  fi.addEventListener('change',()=>{
+    if(fi.files && fi.files[0]) startProcessing(fi.files[0].name);
+  });
+  document.getElementById('resetDemoBtn').addEventListener('click',resetDemo);
+
+  // stop the browser navigating away if a file lands outside the drop zone
+  window.addEventListener('dragover',e=>e.preventDefault());
+  window.addEventListener('drop',e=>e.preventDefault());
+})();
 
 /* ===================== INIT ===================== */
 renderOverview();
