@@ -401,7 +401,7 @@
   @media print{
     @page{
       margin:20mm;
-      @bottom-left{content:"Al Hosn Medical Center, Abu Dhabi";font-size:9pt;color:#6B7280;}
+      @bottom-left{content:"Zayed Health Institute, Abu Dhabi";font-size:9pt;color:#6B7280;}
       @bottom-right{content:"Page " counter(page) " of " counter(pages);font-size:9pt;color:#6B7280;}
     }
 
@@ -508,7 +508,7 @@
       </button>
     </nav>
     <div class="foot">
-      <strong>Al Hosn Medical Center</strong><br>
+      <strong>Zayed Health Institute</strong><br>
       Abu Dhabi, UAE<br><br>
       Independent assurance layer aligned to the DoH Responsible AI Risk Management Protocol.
     </div>
@@ -526,7 +526,7 @@
         <div class="hosp">
           <div class="avatar">AH</div>
           <div class="meta">
-            <b>Al Hosn Medical Center</b>
+            <b>Zayed Health Institute</b>
             <span>Abu Dhabi · Quality &amp; Governance</span>
           </div>
         </div>
@@ -557,7 +557,7 @@
             </button>
             <input type="file" id="fileInput" hidden>
           </div>
-          <div class="uc-note">Demo mode — any file triggers a simulated analysis of Al Hosn Medical Center's AI systems</div>
+          <div class="uc-note">Demo mode — any file triggers a simulated analysis of Zayed Health Institute's AI systems</div>
         </div>
 
         <!-- ===== Processing animation ===== -->
@@ -673,7 +673,7 @@
       <section id="view-register" class="view">
         <div class="section-head" style="display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap;">
           <div>
-            <h2>AI Risk Register — Al Hosn Medical Center</h2>
+            <h2>AI Risk Register — Zayed Health Institute</h2>
             <p>Scored per DoH Protocol: Risk Rating = Asset Criticality × (Likelihood × Impact)</p>
           </div>
           <button class="btn" onclick="openPack()">
@@ -775,13 +775,13 @@
 
 <script>
 /* ===================== DATA (all synthetic, in-memory) ===================== */
-const HOSPITAL = "Al Hosn Medical Center, Abu Dhabi";
+const HOSPITAL = "Zayed Health Institute, Abu Dhabi";
 const INCIDENT_RATE = 8.3;
 const INCIDENT_THRESHOLD = 15;
 
 const systems = [
   {
-    id:"aidoc", name:"Aidoc BriefCase", vendor:"Aidoc", dept:"Radiology",
+    id:"radvision", name:"RadVision Triage", vendor:"RadVision AI", dept:"Radiology",
     use:"Chest X-ray triage AI", crit:"High", status:"drift",
     lastChecked:"22 Jun 2026", mode:"Weekly batch", version:"v3.2.1", gt:"Radiologist confirmation",
     baseline:90,
@@ -797,7 +797,7 @@ const systems = [
     means:"Triage accuracy has drifted from 94% to 87% over 12 weeks and has now crossed below the 90% baseline threshold — meaning a growing share of chest X-rays may be mis-prioritised in the worklist. A fairness gap was also detected: accuracy for Expat — South Asian patients is 6.2 points below the cohort average. Both findings affect patient safety and trigger DoH Responsible AI drift-management and fairness-review obligations."
   },
   {
-    id:"viz", name:"Viz.ai ANEURYSM", vendor:"Viz.ai", dept:"Radiology / Neuro",
+    id:"neurascan", name:"NeuraScan STROKE", vendor:"NeuraScan AI", dept:"Radiology / Neuro",
     use:"CT brain hemorrhage detection", crit:"High", status:"action",
     lastChecked:"23 Jun 2026", mode:"Continuous (per-study)", version:"v2.7.0", gt:"Neuroradiologist confirmation",
     baseline:90,
@@ -813,7 +813,7 @@ const systems = [
     means:"Detection accuracy has fallen below the 90% safety baseline for several consecutive weeks, with sensitivity for time-critical brain hemorrhage now in the action-required zone — a missed or delayed flag here carries severe patient-safety consequences. Accuracy for patients aged over 65 sits 4.5 points below cohort average. The system requires immediate clinical review and vendor escalation under the DoH Protocol."
   },
   {
-    id:"lunit", name:"Lunit INSIGHT MMG", vendor:"Lunit", dept:"Radiology",
+    id:"lumiscan", name:"LumiScan MMG", vendor:"LumiScan AI", dept:"Radiology",
     use:"Mammography screening AI", crit:"High", status:"healthy",
     lastChecked:"22 Jun 2026", mode:"Weekly batch", version:"v4.1.2", gt:"Radiologist + biopsy outcome",
     baseline:90,
@@ -867,11 +867,11 @@ const sysById = id => systems.find(s=>s.id===id);
 
 /* Risk register rows — Risk Rating computed from system criticality × (L×I) */
 const risks = [
-  {id:"R-001", sysId:"aidoc",   desc:"Performance drift — triage accuracy below 90% baseline", L:4, I:4, status:"Mitigating", owner:"Head of Radiology"},
-  {id:"R-002", sysId:"aidoc",   desc:"Fairness gap — accuracy 6.2pp lower for Expat (South Asian) cohort", L:3, I:4, status:"Open", owner:"Chief AI Officer"},
-  {id:"R-003", sysId:"viz",     desc:"Reduced sensitivity for time-critical hemorrhage detection", L:4, I:5, status:"Open", owner:"Head of Radiology"},
+  {id:"R-001", sysId:"radvision",   desc:"Performance drift — triage accuracy below 90% baseline", L:4, I:4, status:"Mitigating", owner:"Head of Radiology"},
+  {id:"R-002", sysId:"radvision",   desc:"Fairness gap — accuracy 6.2pp lower for Expat (South Asian) cohort", L:3, I:4, status:"Open", owner:"Chief AI Officer"},
+  {id:"R-003", sysId:"neurascan",     desc:"Reduced sensitivity for time-critical hemorrhage detection", L:4, I:5, status:"Open", owner:"Head of Radiology"},
   {id:"R-004", sysId:"edtriage",desc:"Human-oversight gap — automation bias in ED triage decisions", L:3, I:5, status:"Mitigating", owner:"Dr. Quality Lead"},
-  {id:"R-005", sysId:"lunit",   desc:"Patient data privacy / PDPL exposure in image-sharing pipeline", L:2, I:5, status:"Open", owner:"Data Protection Officer"},
+  {id:"R-005", sysId:"lumiscan",   desc:"Patient data privacy / PDPL exposure in image-sharing pipeline", L:2, I:5, status:"Open", owner:"Data Protection Officer"},
   {id:"R-006", sysId:"flow",    desc:"Model degradation in no-show prediction affecting clinic scheduling", L:3, I:2, status:"Mitigating", owner:"Head of Operations"}
 ];
 
@@ -1159,7 +1159,7 @@ function openPack(){
     <!-- ===== Letterhead ===== -->
     <div class="lh">
       <div class="lh-left">
-        <div class="lh-entity">Al Hosn Medical Center, Abu Dhabi</div>
+        <div class="lh-entity">Zayed Health Institute, Abu Dhabi</div>
         <div class="lh-sub">Licensed Healthcare Entity — Department of Health Abu Dhabi</div>
       </div>
       <div class="lh-right">
@@ -1178,7 +1178,7 @@ function openPack(){
     <!-- ===== 1. Regulatory basis ===== -->
     <div class="sec">
       <h3 class="sec-h">1. Regulatory Basis and Scope</h3>
-      <p>This governance evidence pack has been prepared in accordance with the Department of Health Abu Dhabi Responsible Artificial Intelligence (AI) Standard (DoH/ST/DDGO/RAI/V1/2025), binding on all licensed healthcare entities from October 2025, and the accompanying Responsible AI Risk Management Protocol. It documents the ongoing performance monitoring, bias assessment, and risk management activities required under: Clause 3.1 (AI Risk Management), Clause 4.2 (Ongoing Monitoring and Performance Management), Clause 5.1 (Fairness and Bias Controls), and Clause 6.2 (Accountability and Audit Trail). This pack covers all clinical AI systems deployed at Al Hosn Medical Center as of the reporting date.</p>
+      <p>This governance evidence pack has been prepared in accordance with the Department of Health Abu Dhabi Responsible Artificial Intelligence (AI) Standard (DoH/ST/DDGO/RAI/V1/2025), binding on all licensed healthcare entities from October 2025, and the accompanying Responsible AI Risk Management Protocol. It documents the ongoing performance monitoring, bias assessment, and risk management activities required under: Clause 3.1 (AI Risk Management), Clause 4.2 (Ongoing Monitoring and Performance Management), Clause 5.1 (Fairness and Bias Controls), and Clause 6.2 (Accountability and Audit Trail). This pack covers all clinical AI systems deployed at Zayed Health Institute as of the reporting date.</p>
     </div>
 
     <!-- ===== 2. Systems overview ===== -->
@@ -1226,7 +1226,7 @@ function openPack(){
     <!-- ===== 5. Assurance statement ===== -->
     <div class="sec">
       <h3 class="sec-h">5. Independent Assurance Statement</h3>
-      <p>This evidence pack has been generated by Sentinel, an independent clinical AI assurance platform operating across all AI vendors deployed at Al Hosn Medical Center. Performance data, drift metrics, and risk ratings have been computed independently of the AI vendors assessed. Sentinel operates as a neutral third-party layer with no commercial relationship with the assessed AI vendors. This pack does not constitute a formal audit opinion. It is intended to support the hospital's internal governance processes and regulatory reporting obligations under the DoH Responsible AI Standard.</p>
+      <p>This evidence pack has been generated by Sentinel, an independent clinical AI assurance platform operating across all AI vendors deployed at Zayed Health Institute. Performance data, drift metrics, and risk ratings have been computed independently of the AI vendors assessed. Sentinel operates as a neutral third-party layer with no commercial relationship with the assessed AI vendors. This pack does not constitute a formal audit opinion. It is intended to support the hospital's internal governance processes and regulatory reporting obligations under the DoH Responsible AI Standard.</p>
     </div>
 
     <!-- ===== 6. Signatures ===== -->
@@ -1250,7 +1250,7 @@ function openPack(){
     </div>
 
     <div class="print-footer">
-      <span>Al Hosn Medical Center, Abu Dhabi</span>
+      <span>Zayed Health Institute, Abu Dhabi</span>
       <span>AGEP-2026-001 · Confidential</span>
     </div>
   `;
