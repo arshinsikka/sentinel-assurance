@@ -399,14 +399,64 @@
 
   /* ---------- Print ---------- */
   @media print{
-    body *{visibility:hidden;}
-    .overlay,.overlay *{visibility:visible;}
-    /* Hide all dashboard chrome entirely */
-    .sidebar,.topbar,.content,.doc-toolbar{display:none !important;}
-    /* Expand the scrolling container to full natural height so no section is clipped */
-    .overlay{position:static;inset:auto;height:auto;overflow:visible;background:#FFFFFF;padding:0;display:block;backdrop-filter:none;}
-    .doc{box-shadow:none;max-width:100%;width:100%;border-radius:0;overflow:visible;height:auto;}
-    .doc-body{padding:0 0 26px;overflow:visible;height:auto;background:#FFFFFF;}
+    @page{
+      margin:20mm;
+      @bottom-left{content:"Al Hosn Medical Center, Abu Dhabi";font-size:9pt;color:#6B7280;}
+      @bottom-right{content:"Page " counter(page) " of " counter(pages);font-size:9pt;color:#6B7280;}
+    }
+
+    /* Root containers must not reserve any space of their own */
+    html,body{
+      margin:0 !important;padding:0 !important;
+      height:auto !important;min-height:0 !important;
+      overflow:visible !important;background:#FFFFFF !important;
+    }
+
+    /* --- Evidence Pack print mode (body.printing-pack is set by openPack()) --- */
+
+    /* The dashboard shell is REMOVED from layout, not merely made invisible.
+       .app carries min-height:100vh, so hiding only its children left a
+       full page of empty space ahead of the document. */
+    body.printing-pack .app,
+    body.printing-pack .main,
+    body.printing-pack .sidebar,
+    body.printing-pack .topbar,
+    body.printing-pack .content,
+    body.printing-pack .doc-toolbar{
+      display:none !important;
+      height:0 !important;min-height:0 !important;max-height:0 !important;
+      margin:0 !important;padding:0 !important;border:0 !important;
+      overflow:hidden !important;
+    }
+
+    /* The overlay becomes a plain static block starting at the top of page 1 */
+    body.printing-pack .overlay{
+      position:static !important;
+      top:0 !important;left:0 !important;right:auto !important;bottom:auto !important;
+      inset:auto !important;
+      margin:0 !important;padding:0 !important;
+      width:100% !important;height:auto !important;
+      min-height:0 !important;max-height:none !important;
+      overflow:visible !important;display:block !important;
+      background:#FFFFFF !important;backdrop-filter:none !important;
+    }
+    body.printing-pack .doc{
+      box-shadow:none !important;border-radius:0 !important;
+      max-width:100% !important;width:100% !important;
+      margin:0 !important;height:auto !important;overflow:visible !important;
+    }
+    body.printing-pack .doc-body{
+      margin:0 !important;padding:0 0 26px !important;
+      height:auto !important;overflow:visible !important;background:#FFFFFF !important;
+      page-break-before:avoid !important;break-before:avoid !important;
+    }
+    /* No page break may be inserted before the letterhead */
+    body.printing-pack .doc-body > .lh,
+    body.printing-pack .doc-body > *:first-child{
+      page-break-before:avoid !important;break-before:avoid !important;
+      margin-top:0 !important;
+    }
+
     /* Keep tables and blocks from splitting mid-row */
     .dtable tr,.dtable thead,.metric-box,.sig-block,.lh{page-break-inside:avoid;break-inside:avoid;}
     .dtable thead{display:table-header-group;}
@@ -416,17 +466,12 @@
     .dtable thead th,.dtable tbody tr:nth-child(even) td,.metric-box .mb-h,.metric-box .mb-note{
       -webkit-print-color-adjust:exact;print-color-adjust:exact;
     }
-    /* Repeating footer: hospital name + page number */
-    .print-footer{
+    /* Repeating footer: hospital name + document reference */
+    body.printing-pack .print-footer{
       display:flex;justify-content:space-between;
       position:fixed;bottom:0;left:0;right:0;
       font-size:9pt;color:#6B7280;border-top:1px solid #E5E7EB;
       padding-top:5px;background:#FFFFFF;
-    }
-    @page{
-      margin:20mm;
-      @bottom-left{content:"Al Hosn Medical Center, Abu Dhabi";font-size:9pt;color:#6B7280;}
-      @bottom-right{content:"Page " counter(page) " of " counter(pages);font-size:9pt;color:#6B7280;}
     }
   }
 </style>
@@ -1210,8 +1255,13 @@ function openPack(){
     </div>
   `;
   document.getElementById('packOverlay').classList.add('show');
+  // Engage Evidence-Pack print mode: strips the dashboard shell from print layout
+  document.body.classList.add('printing-pack');
 }
-function closePack(){ document.getElementById('packOverlay').classList.remove('show'); }
+function closePack(){
+  document.getElementById('packOverlay').classList.remove('show');
+  document.body.classList.remove('printing-pack');
+}
 document.getElementById('packOverlay').addEventListener('click',e=>{ if(e.target.id==='packOverlay') closePack(); });
 document.addEventListener('keydown',e=>{ if(e.key==='Escape') closePack(); });
 
