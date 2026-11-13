@@ -4,396 +4,524 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Sentinel demo: clinical AI assurance</title>
-<meta name="description" content="Working demo of Sentinel, an independent check on clinical AI for Abu Dhabi hospitals. Made-up data.">
+<meta name="description" content="Working demo of Sentinel, which checks every AI system in a hospital against its own clinicians' findings. Made-up data.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 :root{
-  --paper:#FFFFFF; --wash:#F6F8F8; --ink:#10212B; --soft:#4A5C66; --faint:#7C8B93;
-  --rule:#D5DDE0; --rule2:#E8EDEF; --teal:#0B6B6B; --teal2:#095757; --tint:#E9F2F1;
-  --ok:#2F8A44; --okbg:#E8F4EA; --watch:#B07800; --watchbg:#FBF2DC; --act:#C8372D; --actbg:#FBE8E6;
+  --bg:#F5F7F7; --paper:#FFFFFF; --ink:#10212B; --soft:#4A5C66; --faint:#7C8B93;
+  --rule:#DCE3E5; --rule2:#ECF0F1; --teal:#0B6B6B; --teal2:#095757; --tint:#E9F2F1;
+  --ok:#2F8A44; --okbg:#E8F4EA; --watch:#A86F00; --watchbg:#FBF2DC; --act:#C8372D; --actbg:#FBE8E6;
   --vl:#6DB56D; --lo:#E2C200; --me:#F0A202; --hi:#E0352B; --vh:#A51D16;
+  --r:10px; --sh:0 1px 2px rgba(16,33,43,.05),0 1px 1px rgba(16,33,43,.03);
 }
 *{box-sizing:border-box}
 html,body{margin:0;padding:0}
-body{font-family:"Public Sans",-apple-system,"Segoe UI",Roboto,Arial,sans-serif;background:var(--paper);color:var(--ink);font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased}
+body{font-family:"Public Sans",-apple-system,"Segoe UI",Roboto,Arial,sans-serif;background:var(--bg);color:var(--ink);font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased}
 a{color:var(--teal)}
-button{font-family:inherit}
-.wrap{max-width:1200px;margin:0 auto;padding:0 32px}
+button{font-family:inherit;font-size:inherit;color:inherit}
+h1,h2,h3{margin:0;letter-spacing:-0.01em}
+p{margin:0}
+.muted{color:var(--faint)} .soft{color:var(--soft)} .small{font-size:13px}
+:focus-visible{outline:3px solid #8FC2BE;outline-offset:2px;border-radius:4px}
 
-/* header */
-header.top{border-bottom:1px solid var(--rule);background:var(--paper);position:sticky;top:0;z-index:30}
-.bar1{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:16px 0 10px;flex-wrap:wrap}
-.brand{display:flex;align-items:baseline;gap:12px}
-.brand .wm{font-size:22px;font-weight:800;letter-spacing:-0.02em}
-.brand .tg{font-size:13.5px;color:var(--faint)}
-.org{display:flex;align-items:center;gap:12px;font-size:13.5px;color:var(--soft)}
-.org b{color:var(--ink);font-weight:600}
-.chip{display:inline-block;font-size:12.5px;font-weight:600;padding:3px 10px;border-radius:999px;background:var(--watchbg);color:#7A5300;white-space:nowrap}
-nav.tabs{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;margin:0 -4px}
-nav.tabs::-webkit-scrollbar{display:none}
-nav.tabs button{background:none;border:0;border-bottom:3px solid transparent;padding:10px 12px 11px;font-size:14.5px;font-weight:600;color:var(--soft);cursor:pointer;white-space:nowrap}
-nav.tabs button:hover{color:var(--ink)}
-nav.tabs button.on{color:var(--teal);border-bottom-color:var(--teal)}
-nav.tabs button:focus-visible,.btn:focus-visible,.linkbtn:focus-visible,tr.click:focus-visible,.seg button:focus-visible{outline:3px solid #8FC2BE;outline-offset:2px}
+/* ---------- app shell ---------- */
+.app{display:grid;grid-template-columns:236px 1fr;min-height:100vh}
+.side{background:var(--paper);border-right:1px solid var(--rule);position:sticky;top:0;height:100vh;display:flex;flex-direction:column;padding:20px 14px}
+.brand{padding:2px 10px 18px}
+.brand .wm{font-size:21px;font-weight:800;letter-spacing:-0.02em}
+.brand .tg{font-size:12.5px;color:var(--faint);margin-top:1px}
+.nav{display:flex;flex-direction:column;gap:2px}
+.nav button{display:flex;align-items:center;gap:11px;width:100%;text-align:left;background:none;border:0;border-radius:8px;padding:9px 10px;font-size:14.5px;font-weight:600;color:var(--soft);cursor:pointer}
+.nav button svg{flex:0 0 18px;width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.nav button:hover{background:var(--bg);color:var(--ink)}
+.nav button.on{background:var(--tint);color:var(--teal)}
+.nav .cnt{margin-left:auto;font-size:11.5px;font-weight:700;background:var(--actbg);color:var(--act);border-radius:999px;padding:1px 7px}
+.side .foot{margin-top:auto;display:flex;flex-direction:column;gap:2px;border-top:1px solid var(--rule2);padding-top:12px}
+.side .demo-note{font-size:12px;color:var(--faint);padding:10px 10px 0;line-height:1.45}
 
-main{padding:36px 0 64px}
+.main{min-width:0;display:flex;flex-direction:column}
+.topbar{background:var(--paper);border-bottom:1px solid var(--rule);position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:14px;padding:12px 32px;min-height:58px}
+.topbar .hosp{font-size:14px;color:var(--soft)} .topbar .hosp b{color:var(--ink);font-weight:600}
+.topbar .mbrand{display:none;font-weight:800;font-size:19px;letter-spacing:-0.02em}
+.topbar .sp{flex:1}
+.badge{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;padding:3px 10px;border-radius:999px;background:var(--watchbg);color:#7A5300;white-space:nowrap}
+.btn{display:inline-flex;align-items:center;gap:8px;border-radius:8px;padding:9px 16px;font-weight:600;font-size:14px;cursor:pointer;border:1px solid var(--teal);background:var(--teal);color:#fff;text-decoration:none;white-space:nowrap}
+.btn:hover{background:var(--teal2)}
+.btn.ghost{background:var(--paper);color:var(--teal);border-color:var(--rule)}
+.btn.ghost:hover{border-color:var(--teal);background:var(--tint)}
+.btn.sm{padding:6px 12px;font-size:13px}
+.btn svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.linkbtn{background:none;border:0;padding:0;color:var(--teal);font-weight:600;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+
+.content{padding:28px 32px 120px;max-width:1180px;width:100%}
 .view{display:none}
 .view.on{display:block}
-h1{font-size:28px;line-height:1.2;font-weight:700;letter-spacing:-0.012em;margin:0 0 6px}
-h2{font-size:19px;line-height:1.3;font-weight:700;margin:0 0 6px}
-h3{font-size:16px;font-weight:700;margin:0 0 4px}
-.lead{color:var(--soft);font-size:16px;margin:0 0 24px;max-width:820px}
-.muted{color:var(--faint)}
-.small{font-size:13.5px}
-.sec{margin-top:36px}
+.ph{margin-bottom:22px}
+.ph .eyebrow{font-size:12.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--teal);margin-bottom:6px}
+.ph h1{font-size:27px;font-weight:700;line-height:1.2}
+.ph .lead{color:var(--soft);margin-top:6px;max-width:760px}
+.crumb{font-size:13.5px;margin-bottom:10px}
+.card{background:var(--paper);border:1px solid var(--rule);border-radius:var(--r);box-shadow:var(--sh)}
+.card.pad{padding:20px 22px}
+.sec{margin-top:26px}
+.sec > h2{font-size:17px;font-weight:700;margin-bottom:4px}
+.sec > .sub{font-size:13.5px;color:var(--faint);margin-bottom:12px;max-width:780px}
 
-/* intro */
-.intro{border-left:4px solid var(--teal);background:var(--wash);padding:18px 22px;margin-bottom:28px;display:flex;gap:24px;align-items:flex-start;justify-content:space-between}
-.intro h2{font-size:17px;margin-bottom:6px}
-.intro p{margin:0 0 12px;color:var(--soft);max-width:760px}
-.intro .acts{display:flex;gap:10px;flex-wrap:wrap}
-.x{background:none;border:0;font-size:22px;line-height:1;color:var(--faint);cursor:pointer;padding:2px 4px}
+/* status */
+.pill{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:600;padding:3px 10px 3px 8px;border-radius:999px;white-space:nowrap}
+.pill i{width:7px;height:7px;border-radius:50%;background:currentColor;display:inline-block}
+.p-ok{background:var(--okbg);color:var(--ok)} .p-watch{background:var(--watchbg);color:var(--watch)} .p-act{background:var(--actbg);color:var(--act)} .p-na{background:var(--rule2);color:var(--soft)}
+.band{display:inline-block;font-size:11.5px;font-weight:700;padding:2px 8px;border-radius:4px;white-space:nowrap}
+.b-VL{background:var(--vl);color:#fff} .b-L{background:var(--lo);color:#3d3300} .b-M{background:var(--me);color:#3d2800} .b-H{background:var(--hi);color:#fff} .b-VH{background:var(--vh);color:#fff}
+.below{color:var(--act);font-weight:700} .near{color:var(--watch);font-weight:700}
 
-.btn{display:inline-flex;align-items:center;gap:8px;background:var(--teal);color:#fff;border:1px solid var(--teal);font-size:14.5px;font-weight:600;padding:9px 16px;border-radius:4px;cursor:pointer;text-decoration:none}
-.btn:hover{background:var(--teal2)}
-.btn.ghost{background:#fff;color:var(--teal);border-color:var(--rule)}
-.btn.ghost:hover{border-color:var(--teal)}
-.linkbtn{background:none;border:0;color:var(--teal);font-weight:600;cursor:pointer;padding:0;font-size:inherit;text-decoration:underline;text-underline-offset:3px}
+/* home */
+.statusline{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:14px;color:var(--soft);padding:12px 16px;background:var(--paper);border:1px solid var(--rule);border-radius:var(--r);margin-bottom:18px}
+.statusline b{color:var(--ink)}
+.statusline .dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px;vertical-align:1px}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:14px}
+.scard{padding:18px 20px;cursor:pointer;transition:border-color .12s, box-shadow .12s;display:flex;flex-direction:column;gap:10px}
+.scard:hover{border-color:#B9C8CC;box-shadow:0 2px 8px rgba(16,33,43,.07)}
+.scard .top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.scard h3{font-size:16px;font-weight:700}
+.scard .use{font-size:13px;color:var(--faint);margin-top:2px}
+.scard .res{font-size:15px;color:var(--ink)} .scard .res b{font-weight:700}
+.scard .res .tech{display:block;font-size:12.5px;color:var(--faint);margin-top:2px}
+.scard .bot{display:flex;justify-content:space-between;align-items:flex-end;gap:10px;border-top:1px solid var(--rule2);padding-top:10px;font-size:12.5px;color:var(--faint)}
+.scard.act{border-left:4px solid var(--act)} .scard.watch{border-left:4px solid var(--watch)}
+.olist{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:10px}
+.orow{padding:12px 16px;display:flex;justify-content:space-between;gap:12px;align-items:center}
+.orow b{font-weight:600;font-size:14.5px} .orow .use{font-size:12.5px;color:var(--faint)}
 
-/* stat strip */
-.stats{display:grid;grid-template-columns:repeat(5,1fr);border-top:2px solid var(--ink);border-bottom:1px solid var(--rule);margin-bottom:32px}
-.stat{padding:16px 18px 16px 0}
-.stat + .stat{padding-left:18px;border-left:1px solid var(--rule2)}
-.stat .n{font-size:30px;font-weight:700;letter-spacing:-0.02em;line-height:1.1;font-variant-numeric:tabular-nums}
-.stat .l{font-size:13.5px;color:var(--soft);margin-top:4px}
-.stat .s{font-size:12.5px;color:var(--faint);margin-top:2px}
+/* system page */
+.syshead{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap}
+.syshead h1{font-size:27px}
+.facts{display:flex;flex-wrap:wrap;gap:10px 28px;margin-top:14px;font-size:13px;color:var(--faint)}
+.facts b{display:block;color:var(--ink);font-weight:600;font-size:14px;margin-top:1px}
+.subtabs{display:flex;gap:4px;border-bottom:1px solid var(--rule);margin:22px 0 22px;overflow-x:auto;scrollbar-width:none}
+.subtabs::-webkit-scrollbar{display:none}
+.subtabs button{background:none;border:0;border-bottom:3px solid transparent;padding:10px 12px 11px;font-weight:600;color:var(--soft);cursor:pointer;white-space:nowrap}
+.subtabs button.on{color:var(--teal);border-bottom-color:var(--teal)}
+.stab{display:none}.stab.on{display:block}
+.finding{border-radius:var(--r);padding:14px 18px;border:1px solid}
+.finding.act{background:var(--actbg);border-color:#F1C9C5}
+.finding.watch{background:var(--watchbg);border-color:#EED9A6}
+.finding.ok{background:var(--okbg);border-color:#C9E3CE}
+.finding b{font-weight:700}
+.finding p+p{margin-top:4px;color:var(--soft);font-size:14px}
+.cmp{display:grid;grid-template-columns:1fr 1fr 1fr;gap:0;margin-top:16px}
+.cmp > div{padding:18px 22px}
+.cmp > div + div{border-left:1px solid var(--rule2)}
+.cmp .lab{font-size:12.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--faint)}
+.cmp .val{font-size:26px;font-weight:700;margin-top:4px;font-variant-numeric:tabular-nums}
+.cmp .val.bad{color:var(--act)} .cmp .val.good{color:var(--ok)}
+.cmp .note{font-size:13px;color:var(--soft);margin-top:2px}
+.twocol{display:grid;grid-template-columns:1.45fr 1fr;gap:16px;margin-top:16px}
+.chartwrap svg{width:100%;height:auto;display:block}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:12.5px;color:var(--soft);margin-top:8px}
+.legend i{display:inline-block;width:18px;height:3px;vertical-align:middle;margin-right:6px;border-radius:2px}
+.how p{font-size:14.5px}
+.how .big{font-size:15.5px;color:var(--ink);line-height:1.55}
+.cm{display:grid;grid-template-columns:auto 1fr 1fr;border:1px solid var(--rule);border-radius:8px;overflow:hidden;font-size:13px;margin-top:12px}
+.cm div{padding:8px 10px;border-bottom:1px solid var(--rule2)}
+.cm .h{background:var(--bg);color:var(--soft);font-weight:600}
+.cm .v{text-align:right;font-weight:700;font-variant-numeric:tabular-nums;font-size:15px}
+details.work{margin-top:12px}
+details.work summary{cursor:pointer;color:var(--teal);font-weight:600;font-size:13.5px}
+.calc{font-size:13px;color:var(--soft);margin-top:6px}
+.realnote{font-size:13px;color:var(--soft);background:var(--bg);border-radius:8px;padding:10px 12px;margin-top:14px}
 
 /* tables */
-.tw{overflow-x:auto;-webkit-overflow-scrolling:touch}
-table{border-collapse:collapse;width:100%}
-th{font-size:12.5px;font-weight:600;color:var(--faint);text-align:left;padding:0 14px 8px 0;border-bottom:1.5px solid var(--ink);white-space:nowrap;vertical-align:bottom}
-td{font-size:14.5px;padding:12px 14px 12px 0;border-bottom:1px solid var(--rule2);vertical-align:middle}
-td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
-tr.click{cursor:pointer}
-tr.click:hover td{background:var(--wash)}
-.sname{font-weight:600}
-.ssub{font-size:13px;color:var(--faint)}
-.go{color:var(--teal);font-weight:700;font-size:18px}
+.tw{overflow-x:auto}
+table.t{width:100%;border-collapse:collapse;font-size:14px}
+table.t th{text-align:left;font-size:12px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:var(--faint);padding:10px 14px;border-bottom:1px solid var(--rule);white-space:nowrap;background:var(--paper)}
+table.t td{padding:12px 14px;border-bottom:1px solid var(--rule2);vertical-align:top}
+table.t tr:last-child td{border-bottom:0}
+table.t .num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+table.t .sname{font-weight:600}
+table.t .ssub{font-size:12.5px;color:var(--faint)}
+.verdict{font-size:12.5px;font-weight:600;white-space:nowrap}
+.v-pat{color:var(--act)} .v-few{color:var(--faint)} .v-in{color:var(--ok)} .v-ch{color:var(--soft)}
+.chip{display:inline-block;font-size:12px;font-weight:600;padding:2px 9px;border-radius:999px;background:var(--rule2);color:var(--soft);white-space:nowrap}
+.chip.p{background:var(--actbg);color:var(--act)}
 
-.pill{display:inline-flex;align-items:center;gap:7px;font-size:13px;font-weight:600;padding:3px 10px;border-radius:999px;white-space:nowrap}
-.pill i{width:8px;height:8px;border-radius:50%;display:inline-block}
-.p-ok{background:var(--okbg);color:#1F6B30}.p-ok i{background:var(--ok)}
-.p-watch{background:var(--watchbg);color:#7A5300}.p-watch i{background:var(--watch)}
-.p-act{background:var(--actbg);color:#9A231B}.p-act i{background:var(--act)}
-.p-na{background:var(--wash);color:var(--soft)}.p-na i{background:var(--faint)}
-.band{display:inline-block;font-size:12.5px;font-weight:700;padding:2px 8px;border-radius:3px;white-space:nowrap}
-.b-VL{background:var(--vl);color:#fff}.b-L{background:var(--lo);color:#3A3000}.b-M{background:var(--me);color:#3A2400}.b-H{background:var(--hi);color:#fff}.b-VH{background:var(--vh);color:#fff}
-.below{color:var(--act);font-weight:700}
-.near{color:#8A5E00;font-weight:700}
+/* where it fails */
+.fails{display:grid;grid-template-columns:1fr;gap:16px}
+.fhead{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:16px 18px 6px}
+.fhead h3{font-size:15.5px;font-weight:700}
+.fhead span{font-size:12.5px;color:var(--faint)}
+.barcell{display:flex;align-items:center;gap:10px;min-width:150px}
+.barcell .bar{flex:1;height:8px;background:var(--rule2);border-radius:4px;overflow:hidden;min-width:60px}
+.barcell .bar i{display:block;height:100%;background:var(--teal);border-radius:4px}
+.barcell .bar i.bad{background:var(--act)}
+.rule{font-size:13px;color:var(--soft);background:var(--bg);border-radius:8px;padding:12px 14px}
+.callout{border-left:4px solid var(--teal);background:var(--tint);border-radius:0 var(--r) var(--r) 0;padding:14px 18px;font-size:14.5px}
 
-/* system detail */
-.back{margin-bottom:18px}
-.dhead{display:flex;justify-content:space-between;gap:24px;flex-wrap:wrap;align-items:flex-start;margin-bottom:20px}
-.facts{display:flex;flex-wrap:wrap;gap:0;border-top:1px solid var(--rule);border-bottom:1px solid var(--rule);margin-bottom:24px}
-.fact{padding:12px 22px 12px 0;margin-right:22px;font-size:13px;color:var(--faint)}
-.fact b{display:block;color:var(--ink);font-size:14.5px;font-weight:600}
-.finding{border-left:4px solid var(--act);background:var(--actbg);padding:14px 18px;margin-bottom:26px}
-.finding.watch{border-left-color:var(--watch);background:var(--watchbg)}
-.finding.ok{border-left-color:var(--ok);background:var(--okbg)}
-.finding p{margin:0;color:var(--ink)}
-.finding p + p{margin-top:6px;color:var(--soft)}
-.grid2{display:grid;grid-template-columns:1.25fr 1fr;gap:40px;align-items:start}
-.chartbox svg{display:block;width:100%;height:auto}
-.legend{display:flex;gap:18px;flex-wrap:wrap;font-size:13px;color:var(--soft);margin-top:8px}
-.legend span{display:inline-flex;align-items:center;gap:6px}
-.legend i{display:inline-block;width:18px;height:3px}
-.cm{display:grid;grid-template-columns:auto 1fr 1fr;border:1px solid var(--rule);font-size:14px;max-width:420px}
-.cm div{padding:9px 12px;border-right:1px solid var(--rule2);border-bottom:1px solid var(--rule2)}
-.cm .h{color:var(--faint);font-size:12.5px;font-weight:600;background:var(--wash)}
-.cm .v{font-weight:700;font-variant-numeric:tabular-nums;text-align:right}
-.calc-line{font-size:14px;color:var(--soft);margin-top:10px}
-.calc-line b{color:var(--ink)}
+/* timeline */
+.tl{list-style:none;margin:0;padding:0}
+.tl li{position:relative;padding:0 0 18px 26px}
+.tl li:before{content:"";position:absolute;left:5px;top:6px;width:10px;height:10px;border-radius:50%;background:var(--paper);border:2px solid var(--teal)}
+.tl li:after{content:"";position:absolute;left:10px;top:18px;bottom:0;width:2px;background:var(--rule)}
+.tl li:last-child:after{display:none}
+.tl li.red:before{border-color:var(--act);background:var(--act)}
+.tl .d{font-size:12.5px;color:var(--faint);font-weight:600}
+.tl .x{font-size:14.5px}
+.regcard{display:grid;grid-template-columns:repeat(4,1fr);gap:0}
+.regcard > div{padding:16px 18px}
+.regcard > div + div{border-left:1px solid var(--rule2)}
+.regcard .lab{font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--faint);margin-bottom:6px}
+.score{font-size:22px;font-weight:700;margin-right:6px}
+
+/* vendors */
+.gap-bad{color:var(--act);font-weight:700} .gap-ok{color:var(--soft)}
 
 /* register */
-.rtable td{font-size:14px;vertical-align:top}
-.arrow{color:var(--faint);padding:0 4px}
-.kpis{display:grid;grid-template-columns:1fr 1fr;gap:32px;margin-bottom:32px}
-.kpi{border-top:3px solid var(--teal);padding-top:14px}
-.kpi .row{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap}
-.kpi .big{font-size:34px;font-weight:700;letter-spacing:-0.02em;font-variant-numeric:tabular-nums}
-.kpi .tgt{font-size:14px;color:var(--soft)}
-.kpi p{margin:8px 0 0;color:var(--soft);font-size:14px}
+.kline{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:16px}
+.kline .card{padding:14px 18px;flex:1;min-width:260px}
+.kline .lab{font-size:13px;color:var(--soft)}
+.kline .val{font-size:19px;font-weight:700;margin-top:2px}
+.kline .val small{font-size:13px;font-weight:500;color:var(--faint);margin-left:6px}
+tr.new td{background:#F3FAF8}
 
-/* calculator */
-.calc{display:grid;grid-template-columns:1fr 1.1fr;gap:48px;align-items:start}
-.field{margin-bottom:22px}
-.field label,.field .lbl{display:block;font-weight:600;margin-bottom:8px}
-.field .hint{font-size:13px;color:var(--faint);margin-top:6px}
-.seg{display:flex;gap:6px;flex-wrap:wrap}
-.seg button{min-width:52px;padding:9px 12px;border:1px solid var(--rule);background:#fff;border-radius:4px;font-weight:600;font-size:14px;color:var(--soft);cursor:pointer}
-.seg button.on{background:var(--ink);border-color:var(--ink);color:#fff}
-.seg button small{display:block;font-weight:500;font-size:11.5px;opacity:.8}
-.mx{border-collapse:separate;border-spacing:4px;width:auto}
-.mx th,.mx td{border:0;padding:0;text-align:center}
-.mx th{font-size:12.5px;color:var(--faint);font-weight:600;padding:0 4px 4px;white-space:normal;line-height:1.25}
-.mx th.r{text-align:right;padding-right:8px;white-space:nowrap}
-.mx td{width:60px;height:42px;font-size:15px;font-weight:600;font-variant-numeric:tabular-nums;opacity:.35;color:#111}
+/* drawer */
+.scrim{position:fixed;inset:0;background:rgba(16,33,43,.35);z-index:60;display:none}
+.scrim.on{display:block}
+.drawer{position:fixed;top:0;right:0;bottom:0;width:min(520px,100vw);background:var(--paper);z-index:61;box-shadow:-8px 0 30px rgba(16,33,43,.15);transform:translateX(100%);transition:transform .2s ease;display:flex;flex-direction:column}
+.drawer.on{transform:none}
+.drawer .dh{display:flex;justify-content:space-between;align-items:center;padding:18px 22px;border-bottom:1px solid var(--rule)}
+.drawer .dh h2{font-size:18px}
+.drawer .db{padding:18px 22px;overflow-y:auto;flex:1}
+.drawer .df{padding:14px 22px;border-top:1px solid var(--rule);display:flex;gap:10px;justify-content:flex-end}
+.x{background:none;border:0;font-size:24px;line-height:1;cursor:pointer;color:var(--faint);padding:4px 8px;border-radius:6px}
+.x:hover{background:var(--bg);color:var(--ink)}
+.field{margin-bottom:18px}
+.field label,.field .fl{display:block;font-weight:600;font-size:14px;margin-bottom:6px}
+.field .hint{font-size:12.5px;color:var(--faint);margin-top:5px}
+.field input[type=text]{width:100%;padding:10px 12px;border:1px solid var(--rule);border-radius:8px;font:inherit}
+.seg{display:flex;flex-wrap:wrap;gap:6px}
+.seg button{border:1px solid var(--rule);background:var(--paper);border-radius:8px;padding:7px 10px;cursor:pointer;font-size:13px;font-weight:600;text-align:left;line-height:1.25}
+.seg button small{display:block;font-weight:500;color:var(--faint);font-size:11.5px}
+.seg button.on{border-color:var(--teal);background:var(--tint);color:var(--teal)}
+.seg button.on small{color:var(--teal)}
+.result{background:var(--bg);border-radius:var(--r);padding:16px}
+.result .steps{margin:8px 0 0;padding-left:18px;font-size:13.5px;color:var(--soft)}
+.mx{border-collapse:separate;border-spacing:3px;margin-top:12px}
+.mx th{font-size:11px;color:var(--faint);font-weight:600;padding:0 2px;text-align:center}
+.mx th.r{text-align:right;padding-right:6px;white-space:nowrap}
+.mx td{width:44px;height:32px;text-align:center;font-size:13px;font-weight:600;color:#33424A;opacity:.4;border-radius:3px}
 .mx td.VL{background:var(--vl)}.mx td.L{background:var(--lo)}.mx td.M{background:var(--me)}.mx td.H{background:var(--hi);color:#fff}.mx td.VH{background:var(--vh);color:#fff}
-.mx td.hit{opacity:1;outline:3px solid var(--ink);outline-offset:-3px;font-size:17px;font-weight:800}
-.result{border-top:2px solid var(--ink);padding-top:16px;margin-top:22px}
-.result .score{font-size:56px;font-weight:800;letter-spacing:-0.03em;line-height:1}
-.steps-list{margin:14px 0 0;padding:0;list-style:none;font-size:14px;color:var(--soft)}
-.steps-list li{padding:6px 0;border-bottom:1px solid var(--rule2)}
-.steps-list b{color:var(--ink)}
+.mx td.hit{opacity:1;outline:3px solid var(--ink);outline-offset:-3px}
 
-/* data */
-.drop{border:2px dashed #9CC9C5;background:var(--wash);padding:28px;text-align:center;border-radius:4px;cursor:pointer}
+/* reports */
+.rgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px}
+.rgrid .card{padding:16px 18px}
+.rgrid .lab{font-size:13px;color:var(--soft)}
+.rgrid .val{font-size:20px;font-weight:700;margin:2px 0}
+.doc{padding:34px 40px;margin-top:16px;font-size:13.5px}
+.doc .dhd{display:flex;justify-content:space-between;gap:20px;border-bottom:2px solid var(--ink);padding-bottom:14px;flex-wrap:wrap}
+.doc .ent{font-weight:700;font-size:16px}
+.doc .meta{font-size:12.5px;color:var(--soft);text-align:right}
+.doc h2.tt{font-size:22px;margin:18px 0 2px}
+.doc .stt{color:var(--act);font-weight:600;font-size:12.5px;margin-bottom:10px}
+.doc section{margin-top:18px}
+.doc h3{font-size:14.5px;margin-bottom:6px}
+.doc .ref{font-weight:500;color:var(--faint);font-size:12px;margin-left:6px}
+.doc table{width:100%;border-collapse:collapse;font-size:12.5px}
+.doc th,.doc td{text-align:left;border:1px solid var(--rule);padding:6px 8px;vertical-align:top}
+.doc th{background:var(--bg)}
+.doc .sig{display:flex;gap:40px;margin-top:30px}
+.doc .sig div{flex:1;border-top:1px solid var(--ink);padding-top:6px;font-size:12px;color:var(--soft)}
+.doc .sig b{display:block;color:var(--ink)}
+
+/* about */
+.drop{border:2px dashed var(--rule);border-radius:var(--r);padding:26px;text-align:center;cursor:pointer;color:var(--soft);background:var(--paper)}
 .drop.over{border-color:var(--teal);background:var(--tint)}
-.drop p{margin:6px 0 0;color:var(--soft)}
-.msg{margin-top:14px;padding:12px 16px;border-left:4px solid var(--teal);background:var(--wash);font-size:14px}
-.msg.err{border-left-color:var(--act);background:var(--actbg)}
-code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:13px;background:var(--wash);padding:1px 5px;border-radius:3px}
-.cols2{display:grid;grid-template-columns:1fr 1fr;gap:40px}
+.msg{margin-top:12px;padding:10px 14px;border-radius:8px;background:var(--okbg);font-size:13.5px}
+.msg.err{background:var(--actbg)}
+.prose p+p{margin-top:10px}
+.prose ul{margin:8px 0 0;padding-left:20px}
+.prose li{margin:4px 0}
+code{font-size:12.5px;background:var(--rule2);padding:1px 5px;border-radius:4px}
 
-/* report */
-.doc{max-width:860px;border:1px solid var(--rule);padding:44px 48px;background:#fff}
-.doc .dh{display:flex;justify-content:space-between;gap:24px;flex-wrap:wrap;border-bottom:2px solid var(--ink);padding-bottom:16px}
-.doc .dh .ent{font-size:20px;font-weight:700}
-.doc .meta{font-size:13px;color:var(--soft);line-height:1.7}
-.doc .meta b{color:var(--ink);font-weight:600}
-.doc h2.t{text-align:center;font-size:19px;margin:26px 0 4px}
-.doc .st{text-align:center;color:var(--faint);font-size:13.5px;margin-bottom:6px}
-.doc section{margin-top:26px}
-.doc h3{font-size:14.5px;border-bottom:1px solid var(--rule);padding-bottom:6px;margin-bottom:10px}
-.doc p{font-size:14px;color:var(--soft);margin:0 0 8px}
-.doc td,.doc th{font-size:12.5px;padding:7px 10px 7px 0}
-.doc .ref{font-size:12px;color:var(--teal);font-weight:600}
-.sig{display:grid;grid-template-columns:1fr 1fr;gap:40px;margin-top:40px}
-.sig div{border-top:1px solid var(--ink);padding-top:8px;font-size:13px;color:var(--soft)}
-.sig b{color:var(--ink);display:block}
+/* welcome + tour */
+.modal{position:fixed;inset:0;z-index:80;display:none;align-items:center;justify-content:center;padding:16px;background:rgba(16,33,43,.45)}
+.modal.on{display:flex}
+.modal .box{background:var(--paper);border-radius:14px;max-width:560px;width:100%;padding:30px 32px;box-shadow:0 20px 60px rgba(16,33,43,.25)}
+.modal .eyebrow{font-size:12.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--teal)}
+.modal h2{font-size:24px;margin:6px 0 10px;line-height:1.25}
+.modal p{color:var(--soft)}
+.modal .acts{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px}
+.modal .fine{font-size:12.5px;color:var(--faint);margin-top:16px}
+.tour{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);z-index:70;width:min(640px,calc(100vw - 24px));background:var(--ink);color:#fff;border-radius:14px;box-shadow:0 14px 40px rgba(16,33,43,.35);padding:16px 18px 14px;display:none}
+.tour.on{display:block}
+.tour .tt{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.tour .stp{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#8FD3CC}
+.tour h3{font-size:17px;margin:4px 0 4px;color:#fff}
+.tour p{font-size:14px;color:#D3DDE0;line-height:1.5}
+.tour .ta{display:flex;align-items:center;gap:8px;margin-top:12px}
+.tour .dots{display:flex;gap:5px;flex:1}
+.tour .dots i{width:7px;height:7px;border-radius:50%;background:#3B5560}
+.tour .dots i.on{background:#8FD3CC}
+.tour .btn{border-color:#8FD3CC;background:#8FD3CC;color:var(--ink)}
+.tour .btn:hover{background:#B5E4DF}
+.tour .btn.ghost{background:transparent;color:#fff;border-color:#3B5560}
+.tour .btn.ghost:hover{background:#1E3742}
+.tour .x{color:#9FB2B8} .tour .x:hover{background:#1E3742;color:#fff}
+.hl{position:relative;z-index:5;box-shadow:0 0 0 3px var(--paper),0 0 0 6px #2BB3A6 !important;border-radius:var(--r);transition:box-shadow .2s}
 
-footer.ft{border-top:1px solid var(--rule);padding:18px 0 28px;font-size:13px;color:var(--faint)}
+/* bottom nav (phone) */
+.bnav{display:none}
 
-@media (max-width:960px){
-  .stats{grid-template-columns:repeat(3,1fr)}
-  .stat:nth-child(4){border-left:0;padding-left:0}
-  .stat:nth-child(n+4){border-top:1px solid var(--rule2)}
-  .grid2,.calc,.cols2,.kpis{grid-template-columns:1fr;gap:28px}
+@media (max-width:980px){
+  .twocol{grid-template-columns:1fr}
+  .regcard{grid-template-columns:1fr 1fr}
+  .regcard > div:nth-child(3){border-left:0}
+  .regcard > div:nth-child(n+3){border-top:1px solid var(--rule2)}
 }
-@media (max-width:640px){
-  .wrap{padding:0 16px}
-  h1{font-size:23px}
-  .lead{font-size:15px}
-  .stats{grid-template-columns:1fr 1fr}
-  .stat{padding:12px 10px 12px 0}
-  .stat + .stat{padding-left:10px}
-  .stat:nth-child(odd){border-left:0;padding-left:0}
-  .stat:nth-child(n+3){border-top:1px solid var(--rule2)}
-  .stat .n{font-size:24px}
-  .org .who{display:none}
-  .intro{padding:14px 16px}
-  .doc{padding:24px 18px}
-  .mx td{width:44px;height:36px;font-size:13px}
+@media (max-width:860px){
+  .app{grid-template-columns:1fr}
+  .side{display:none}
+  .topbar{padding:10px 16px}
+  .topbar .mbrand{display:block}
+  .topbar .hosp{display:none}
+  .content{padding:20px 16px 150px}
+  .ph h1,.syshead h1{font-size:23px}
+  .cards{grid-template-columns:1fr}
+  .cmp{grid-template-columns:1fr}
+  .cmp > div + div{border-left:0;border-top:1px solid var(--rule2)}
+  .bnav{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:40;background:var(--paper);border-top:1px solid var(--rule);padding:6px 4px calc(6px + env(safe-area-inset-bottom))}
+  .bnav button{flex:1;background:none;border:0;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:10.5px;font-weight:600;color:var(--faint);padding:4px 0;cursor:pointer}
+  .bnav button svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+  .bnav button.on{color:var(--teal)}
+  .tour{bottom:72px;padding:12px 14px 10px}
+  .tour h3{font-size:15.5px}
+  .tour p{font-size:13px}
+  .tour .ta{margin-top:8px}
+  table.t.bd th,table.t.bd td{padding:9px 8px}
+  .barcell{min-width:0}
+  .barcell .bar{display:none}
+  .verdict{white-space:normal}
+  .fhead{flex-direction:column;gap:2px}
+  .doc{padding:20px 16px}
+  table.t.cardify thead,table.t.cardify tr.th{display:none}
+  table.t.cardify,table.t.cardify tbody,table.t.cardify tr,table.t.cardify td{display:block;width:100%}
+  table.t.cardify tr{border-bottom:1px solid var(--rule);padding:10px 0}
+  table.t.cardify td{border:0;padding:3px 14px;text-align:left !important}
+  table.t.cardify td[data-l]:before{content:attr(data-l);display:block;font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--faint)}
   .hide-sm{display:none}
 }
 @media print{
-  header.top,footer.ft,.noprint,.intro{display:none !important}
-  .view{display:none !important}
-  #view-report{display:block !important}
-  main{padding:0}
-  .wrap{max-width:none;padding:0}
-  .doc{border:0;padding:0;max-width:none}
-  @page{margin:16mm}
-  body{-webkit-print-color-adjust:exact;print-color-adjust:exact}
-  tr,section h3{break-inside:avoid}
+  body{background:#fff}
+  .side,.topbar,.bnav,.tour,.modal,.no-print,.view:not(#view-reports),#repSummary{display:none !important}
+  .app{display:block} .content{padding:0;max-width:none}
+  #view-reports{display:block !important}
+  #docWrap{display:block !important}
+  .doc{border:0;box-shadow:none;padding:0}
 }
 </style>
 </head>
 <body>
-<header class="top">
-  <div class="wrap">
-    <div class="bar1">
-      <div class="brand"><span class="wm">Sentinel</span><span class="tg hide-sm">Independent check on clinical AI</span></div>
-      <div class="org"><span class="who">Signed in as <b>Quality and governance team</b>, Example General Hospital, Abu Dhabi</span><span class="chip">Demo with made-up data</span></div>
-    </div>
-    <nav class="tabs" role="tablist" aria-label="Sections">
-      <button data-v="overview" class="on">Overview</button>
-      <button data-v="system">System detail</button>
-      <button data-v="register">Risk register</button>
-      <button data-v="calculator">Risk calculator</button>
-      <button data-v="report">Report pack</button>
-      <button data-v="data">Data and method</button>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-home" viewBox="0 0 24 24"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/><path d="M10 20v-6h4v6"/></symbol>
+  <symbol id="i-sys" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="14" rx="2"/><path d="M7 14l3-3 3 2 4-5"/><path d="M8 21h8"/></symbol>
+  <symbol id="i-vend" viewBox="0 0 24 24"><path d="M4 20V9l8-5 8 5v11"/><path d="M9 20v-6h6v6"/><path d="M3 20h18"/></symbol>
+  <symbol id="i-reg" viewBox="0 0 24 24"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4V2.8h6V4"/><path d="M8.5 10h7M8.5 14h7M8.5 18h4"/></symbol>
+  <symbol id="i-rep" viewBox="0 0 24 24"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6"/><path d="M8 13h8M8 17h5"/></symbol>
+  <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.5"/></symbol>
+  <symbol id="i-play" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M10 8.5l6 3.5-6 3.5z"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="i-dl" viewBox="0 0 24 24"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></symbol>
+  <symbol id="i-print" viewBox="0 0 24 24"><path d="M7 9V3h10v6"/><rect x="3" y="9" width="18" height="8" rx="2"/><path d="M7 14h10v7H7z"/></symbol>
+</svg>
+
+<div class="app">
+  <aside class="side" aria-label="Main navigation">
+    <div class="brand"><div class="wm">Sentinel</div><div class="tg">Clinical AI assurance</div></div>
+    <nav class="nav" id="nav">
+      <button data-v="home"><svg><use href="#i-home"/></svg>Home</button>
+      <button data-v="systems"><svg><use href="#i-sys"/></svg>AI systems<span class="cnt" id="navCnt"></span></button>
+      <button data-v="vendors"><svg><use href="#i-vend"/></svg>Vendors</button>
+      <button data-v="register"><svg><use href="#i-reg"/></svg>Risk register</button>
+      <button data-v="reports"><svg><use href="#i-rep"/></svg>Reports</button>
     </nav>
-  </div>
-</header>
-
-<main class="wrap">
-
-<!-- OVERVIEW -->
-<section class="view on" id="view-overview">
-  <div class="intro" id="intro">
-    <div>
-      <h2>What you are looking at</h2>
-      <p>A working demo of Sentinel for a made-up hospital. Every number on these pages is calculated in your browser from a sample file of <span id="introRows">about 8,000</span> made-up cases: what each AI system said, and what the clinicians later concluded. Nothing is sent anywhere.</p>
-      <div class="acts">
-        <button class="btn" id="introGo">Start with the system that needs action</button>
-        <button class="btn ghost" data-jump="data">How the numbers are made</button>
-      </div>
+    <div class="foot nav">
+      <button data-tour="1"><svg><use href="#i-play"/></svg>Take the 3-minute tour</button>
+      <button data-v="about"><svg><use href="#i-info"/></svg>About this demo</button>
+      <p class="demo-note">A fictional hospital with made-up data. Every figure is calculated in your browser.</p>
     </div>
-    <button class="x" id="introClose" aria-label="Hide this introduction">&times;</button>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <span class="mbrand">Sentinel</span>
+      <span class="hosp">Signed in as <b>Quality and AI governance team</b>, Example General Hospital, Abu Dhabi</span>
+      <span class="sp"></span>
+      <span class="badge">Made-up data</span>
+      <button class="btn ghost sm" data-tour="1"><svg><use href="#i-play"/></svg><span>Tour</span></button>
+    </header>
+
+    <main class="content" id="content">
+
+      <!-- HOME -->
+      <section class="view" id="view-home" aria-labelledby="hH">
+        <div class="ph"><div class="eyebrow" id="homeWeek"></div><h1 id="hH">How the hospital's AI is performing</h1>
+          <p class="lead">Each week, Sentinel checks every monitored AI system against what the hospital's own clinicians concluded, on its own patients.</p></div>
+        <div class="statusline" id="statusLine"></div>
+        <div class="cards" id="homeCards"></div>
+        <div class="sec"><h2>Other AI in use</h2><p class="sub">Lower-risk systems. They are listed and scored in the risk register, as the Standard requires, without weekly performance checks.</p>
+          <div class="olist" id="homeOther"></div></div>
+      </section>
+
+      <!-- SYSTEMS LIST -->
+      <section class="view" id="view-systems" aria-labelledby="sH">
+        <div class="ph"><h1 id="sH">AI systems</h1><p class="lead">Every AI system the hospital uses. Select one to see how it is performing, where it fails, and what has been done about it.</p></div>
+        <div class="card tw"><table class="t cardify" id="sysTable"></table></div>
+      </section>
+
+      <!-- SYSTEM DETAIL -->
+      <section class="view" id="view-system" aria-labelledby="sdName">
+        <div class="crumb"><button class="linkbtn" data-v="systems">AI systems</button> <span class="muted">/</span> <span id="sdCrumb"></span></div>
+        <div class="syshead"><div><h1 id="sdName"></h1><p class="soft" id="sdSub" style="margin-top:4px"></p></div><div id="sdStatus"></div></div>
+        <div class="facts" id="sdFacts"></div>
+        <div class="subtabs" role="tablist" id="sdTabs">
+          <button data-t="perf" class="on" role="tab">Performance</button>
+          <button data-t="fails" role="tab">Where it fails</button>
+          <button data-t="acts" role="tab">Register and actions</button>
+        </div>
+
+        <div class="stab on" id="t-perf">
+          <div class="finding" id="sdFinding"></div>
+          <div class="card cmp" id="cmpBlock"></div>
+          <div class="twocol">
+            <div class="card pad"><h2 style="font-size:16px" id="chTitle"></h2><p class="small muted" style="margin:2px 0 10px">Each point covers the four weeks up to that date. Red points are on the wrong side of the floor.</p>
+              <div class="chartwrap" id="sdChart"></div><div class="legend" id="sdLegend"></div></div>
+            <div class="card pad how" id="howBlock"></div>
+          </div>
+        </div>
+
+        <div class="stab" id="t-fails">
+          <div id="failBlock"></div>
+        </div>
+
+        <div class="stab" id="t-acts">
+          <div id="actBlock"></div>
+        </div>
+      </section>
+
+      <!-- VENDORS -->
+      <section class="view" id="view-vendors" aria-labelledby="vH">
+        <div class="ph"><h1 id="vH">Vendors</h1><p class="lead">What each vendor reported against what the hospital's own check finds, the staff time each tool costs in alerts, and what to raise before renewal.</p></div>
+        <div class="card tw" id="vendTable"></div>
+        <p class="small muted" style="margin-top:10px">Vendor-reported figures here are made up for this demo. Real vendors publish figures from their own testing before sale, often on other hospitals' cases. Alerts per real case counts every alert raised in the last four weeks, divided by the alerts that turned out to be right.</p>
+      </section>
+
+      <!-- REGISTER -->
+      <section class="view" id="view-register" aria-labelledby="rH">
+        <div class="ph" style="display:flex;justify-content:space-between;gap:16px;align-items:flex-end;flex-wrap:wrap">
+          <div><h1 id="rH">Risk register</h1><p class="lead">Every AI system, scored on the Department of Health's risk table. Starting a register needs only a list of systems and owners, with no patient data.</p></div>
+          <button class="btn" id="addBtn"><svg><use href="#i-plus"/></svg>Add an AI system</button>
+        </div>
+        <div class="kline" id="kline"></div>
+        <div class="card tw" id="regWrap"><table class="t cardify" id="regTable"></table></div>
+        <p class="small muted" style="margin-top:10px">Ratings follow the Department of Health's Responsible AI Risk Management Protocol: likelihood times impact gives the exposure, and the exposure band with the system's criticality gives the rating from the Protocol's table. Ratings are shown before and after the controls the hospital has in place.</p>
+      </section>
+
+      <!-- REPORTS -->
+      <section class="view" id="view-reports" aria-labelledby="pH">
+        <div id="repSummary">
+          <div class="ph" style="display:flex;justify-content:space-between;gap:16px;align-items:flex-end;flex-wrap:wrap">
+            <div><h1 id="pH">Reports</h1><p class="lead" id="repLead"></p></div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap" class="no-print"><button class="btn ghost" id="docToggle">Show the full report pack</button><button class="btn" id="printBtn"><svg><use href="#i-print"/></svg>Print or save as PDF</button></div>
+          </div>
+          <div class="rgrid" id="repGrid"></div>
+          <div class="sec"><h2>Open actions</h2><p class="sub">Treatment plans that are not yet complete, with owners and due dates.</p><div class="card tw"><table class="t cardify" id="repActs"></table></div></div>
+        </div>
+        <div id="docWrap" style="display:none"><div class="card doc" id="doc"></div></div>
+      </section>
+
+      <!-- ABOUT -->
+      <section class="view" id="view-about" aria-labelledby="aH">
+        <div class="ph"><h1 id="aH">About this demo</h1><p class="lead">What you are looking at, where the numbers come from, and how to test it with your own changes.</p></div>
+        <div class="twocol" style="grid-template-columns:1fr 1fr">
+          <div class="card pad prose">
+            <h2 style="font-size:17px;margin-bottom:8px">What this is</h2>
+            <p>A working demo of Sentinel for a fictional hospital. Every figure is calculated in your browser from a sample file of made-up cases: for each case, what the AI said and what the hospital's clinician later concluded. Nothing is sent anywhere.</p>
+            <p>In a real hospital, Sentinel would run inside the hospital's own systems or its UAE cloud, reading the same two things from records the hospital already holds, so patient records never leave it.</p>
+            <h2 style="font-size:17px;margin:18px 0 8px">How the figures are worked out</h2>
+            <ul>
+              <li><b>Catch rate (sensitivity):</b> of the cases the clinician confirmed, the share the AI flagged.</li>
+              <li><b>Correctly left alone (specificity):</b> of the cases the clinician ruled out, the share the AI did not flag.</li>
+              <li><b>Four-week windows:</b> each weekly figure covers the last four weeks, so one unusual week does not raise a false alarm.</li>
+              <li><b>Patterns:</b> a group is called a likely pattern only when it has at least 30 confirmed cases, is at least 5 points below the rest, and the difference is too large to be chance (a two-proportion test at the 99% level).</li>
+              <li><b>Risk ratings:</b> the Department of Health's Responsible AI Risk Management Protocol (October 2025), using its rating table.</li>
+            </ul>
+          </div>
+          <div class="card pad">
+            <h2 style="font-size:17px;margin-bottom:8px">Test it yourself</h2>
+            <p class="soft" id="dataNow" style="font-size:14px"></p>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;margin:14px 0">
+              <button class="btn" id="dlBtn"><svg><use href="#i-dl"/></svg>Download the sample file</button>
+              <button class="btn ghost" id="resetBtn">Go back to the sample</button>
+            </div>
+            <div class="drop" id="drop" tabindex="0" role="button" aria-label="Load a CSV file">Change the sample in any spreadsheet, then drop it here or click to choose it. Every page recalculates.</div>
+            <input type="file" id="file" accept=".csv,text/csv" hidden>
+            <div id="loadMsg"></div>
+            <h3 style="font-size:14.5px;margin:18px 0 6px">Columns in the file</h3>
+            <p class="small soft"><code>system_id</code>, <code>date</code> (YYYY-MM-DD), <code>ai_output</code> and <code>clinician_finding</code> (1 or 0; for the record assistant, the reviewer's verdict: ok, minor_error or major_error), <code>age_group</code>, <code>sex</code>, <code>nationality_group</code>. Optional: <code>scanner</code> and <code>finding_type</code>, used for "Where it fails".</p>
+            <h3 style="font-size:14.5px;margin:18px 0 6px">Real-world reference points</h3>
+            <p class="small soft">Published US approval summaries for bleed-detection AI report catching about 93% of bleeds (Aidoc BriefCase, 2018: 93.6%; Viz ICH, 2020: 93%). When Michigan Medicine checked a widely used sepsis tool on its own patients, the vendor had reported 76 to 83% accuracy; the hospital found 63% (JAMA Internal Medicine, 2021).</p>
+          </div>
+        </div>
+        <p class="small muted" style="margin-top:16px">Sentinel demo. Example General Hospital is fictional, vendor names are placeholders, and all data is made up. Risk method from the Department of Health Abu Dhabi Responsible AI Standard and Risk Management Protocol (October 2025).</p>
+      </section>
+
+    </main>
   </div>
+</div>
 
-  <h1>Every AI system in use, and how each one is performing</h1>
-  <p class="lead" id="ovLead">Results cover the last 12 weeks.</p>
+<!-- phone navigation -->
+<nav class="bnav" id="bnav" aria-label="Main navigation">
+  <button data-v="home"><svg><use href="#i-home"/></svg>Home</button>
+  <button data-v="systems"><svg><use href="#i-sys"/></svg>Systems</button>
+  <button data-v="vendors"><svg><use href="#i-vend"/></svg>Vendors</button>
+  <button data-v="register"><svg><use href="#i-reg"/></svg>Register</button>
+  <button data-v="reports"><svg><use href="#i-rep"/></svg>Reports</button>
+</nav>
 
-  <div class="stats" id="stats"></div>
-
-  <h2>Under performance monitoring</h2>
-  <p class="muted small" style="margin:0 0 12px">Each figure is for the latest four weeks, compared with the floor the hospital agreed for that system. Select a row for detail.</p>
-  <div class="tw"><table id="ovTable"></table></div>
-
-  <div class="sec">
-    <h2>Other AI in use</h2>
-    <p class="muted small" style="margin:0 0 12px">Lower-risk systems. The Standard still requires each one to have a risk assessment and an entry in the register.</p>
-    <div class="tw"><table id="ovOther"></table></div>
+<!-- add system drawer -->
+<div class="scrim" id="scrim"></div>
+<aside class="drawer" id="drawer" aria-labelledby="dTitle" role="dialog" aria-modal="true">
+  <div class="dh"><h2 id="dTitle">Add an AI system</h2><button class="x" id="dClose" aria-label="Close">&times;</button></div>
+  <div class="db">
+    <div class="field"><label for="dName">Name of the system</label><input type="text" id="dName" value="Pathology slide triage"><div class="hint">No patient data is needed for this step.</div></div>
+    <div class="field"><span class="fl">How critical is it?</span><div class="seg" id="cCrit"></div><div class="hint" id="cCritHint"></div></div>
+    <div class="field"><span class="fl">How likely is a problem?</span><div class="seg" id="cL"></div></div>
+    <div class="field"><span class="fl">How bad would it be for patients or the hospital?</span><div class="seg" id="cI"></div></div>
+    <div class="result" id="cResult"></div>
   </div>
-</section>
+  <div class="df"><button class="btn ghost" id="dCancel">Cancel</button><button class="btn" id="dAdd">Add to register</button></div>
+</aside>
 
-<!-- SYSTEM DETAIL -->
-<section class="view" id="view-system">
-  <div class="back noprint"><button class="linkbtn" data-jump="overview">Back to overview</button></div>
-  <div class="dhead">
-    <div>
-      <h1 id="sdName"></h1>
-      <div class="muted" id="sdSub"></div>
-    </div>
-    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
-      <label for="sdPick" class="muted small">Switch system</label>
-      <select id="sdPick" style="font:inherit;padding:7px 10px;border:1px solid var(--rule);border-radius:4px;background:#fff"></select>
-    </div>
+<!-- welcome -->
+<div class="modal" id="welcome" role="dialog" aria-modal="true" aria-labelledby="wH">
+  <div class="box">
+    <div class="eyebrow">Sentinel demo</div>
+    <h2 id="wH">See how a hospital checks its own AI</h2>
+    <p>Hospitals use AI to read scans and raise alerts, but the evidence it works usually comes from the vendor. Sentinel checks each AI system against the hospital's own clinicians' findings, on its own patients, and keeps the records Abu Dhabi's Department of Health requires.</p>
+    <div class="acts"><button class="btn" id="wTour"><svg><use href="#i-play"/></svg>Take the 3-minute tour</button><button class="btn ghost" id="wSkip">Explore on my own</button></div>
+    <p class="fine">A fictional hospital with made-up data. Every figure is calculated live in your browser.</p>
   </div>
-  <div class="facts" id="sdFacts"></div>
-  <div class="finding" id="sdFinding"></div>
-  <div class="grid2">
-    <div>
-      <h2 id="sdChartTitle">Performance over 12 weeks</h2>
-      <p class="muted small" style="margin:0 0 10px" id="sdChartSub"></p>
-      <div class="chartbox" id="sdChart"></div>
-      <div class="legend" id="sdLegend"></div>
-    </div>
-    <div>
-      <h2>How the latest figures were worked out</h2>
-      <p class="muted small" style="margin:0 0 12px" id="sdCmSub"></p>
-      <div id="sdCm"></div>
-    </div>
-  </div>
-  <div class="sec" id="sdGroupsSec">
-    <h2>Results by patient group</h2>
-    <p class="muted small" style="margin:0 0 12px" id="sdGroupsSub"></p>
-    <div class="tw"><table id="sdGroups"></table></div>
-  </div>
-  <div class="sec">
-    <h2>Linked entries in the risk register</h2>
-    <div class="tw"><table id="sdRisks" class="rtable"></table></div>
-  </div>
-</section>
+</div>
 
-<!-- REGISTER -->
-<section class="view" id="view-register">
-  <h1>AI risk register</h1>
-  <p class="lead">One entry per risk, scored with the Department of Health's Responsible AI Risk Management Protocol: likelihood and impact give the exposure, and the exposure band and the system's criticality give the rating from the Protocol's table. Ratings are shown before and after the controls the hospital has put in place.</p>
-  <div class="kpis" id="kpis"></div>
-  <div class="tw"><table id="regTable" class="rtable"></table></div>
-  <p class="muted small" style="margin-top:12px">L = likelihood, I = impact, both scored 1 to 5 by the risk owner. Ratings and bands are looked up in the Protocol's table, so the same number can fall in different bands for different criticality levels. Live status comes from performance monitoring.</p>
-</section>
-
-<!-- CALCULATOR -->
-<section class="view" id="view-calculator">
-  <h1>Risk calculator</h1>
-  <p class="lead">Score any AI risk with the Protocol's method. Choose how critical the system is, how likely the problem is, and how bad it would be.</p>
-  <div class="calc">
-    <div>
-      <div class="field"><span class="lbl">How critical is the system?</span><div class="seg" id="cCrit"></div><div class="hint" id="cCritHint"></div></div>
-      <div class="field"><span class="lbl">How likely is the problem?</span><div class="seg" id="cL"></div></div>
-      <div class="field"><span class="lbl">How bad would it be?</span><div class="seg" id="cI"></div></div>
-      <ul class="steps-list" id="cSteps"></ul>
-    </div>
-    <div>
-      <div class="lbl" style="font-weight:600;margin-bottom:8px">Risk rating table, as printed in the Protocol</div>
-      <div class="tw"><table class="mx" id="cMx"></table></div>
-      <p class="muted small" style="margin:6px 0 0">Rows: how critical the system is. Columns: exposure band.</p>
-      <div class="result" id="cResult"></div>
-    </div>
-  </div>
-</section>
-
-<!-- REPORT -->
-<section class="view" id="view-report">
-  <div class="noprint" style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:20px">
-    <h1 style="margin:0;flex:1;min-width:240px">Report pack</h1>
-    <button class="btn" id="printBtn">Print or save as PDF</button>
-  </div>
-  <p class="lead noprint">Built from the same data and register as the other pages. It is the hospital's own record, ready for internal sign-off and for its regular reporting to the Department of Health.</p>
-  <div class="doc" id="doc"></div>
-</section>
-
-<!-- DATA -->
-<section class="view" id="view-data">
-  <h1>Data and method</h1>
-  <p class="lead">The demo runs on a sample file of made-up cases. You can download it, change it, and load it back to see every page recalculate. The file never leaves your browser.</p>
-  <div class="msg" id="dataNow"></div>
-  <div class="cols2 sec" style="margin-top:24px">
-    <div>
-      <h2>Try it</h2>
-      <p class="muted small" style="margin:0 0 14px">Download the sample, edit it in any spreadsheet (for example, change some <code>ai_output</code> values for stroke detection), save it as CSV and load it here.</p>
-      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px">
-        <button class="btn" id="dlBtn">Download sample file</button>
-        <button class="btn ghost" id="resetBtn">Go back to the sample</button>
-      </div>
-      <div class="drop" id="drop" tabindex="0" role="button" aria-label="Load a CSV file">
-        <b>Drop a CSV file here, or select to choose one</b>
-        <p class="small">Same columns as the sample file</p>
-      </div>
-      <input type="file" id="file" accept=".csv,text/csv" hidden>
-      <div id="loadMsg"></div>
-    </div>
-    <div>
-      <h2>What each row is</h2>
-      <p class="muted small" style="margin:0 0 10px">One row per case. These are records a hospital already holds: the AI's output and the clinician's conclusion.</p>
-      <div class="tw"><table>
-        <tr><th>Column</th><th>What goes in it</th></tr>
-        <tr><td><code>system_id</code></td><td>stroke, chest, sepsis, triage or assistant</td></tr>
-        <tr><td><code>date</code></td><td>Date of the case, as YYYY-MM-DD</td></tr>
-        <tr><td><code>ai_output</code></td><td>1 if the AI flagged the case, 0 if not. For the assistant, the word summary</td></tr>
-        <tr><td><code>clinician_finding</code></td><td>1 if the clinician confirmed the condition, 0 if not. For the assistant, the reviewer's verdict: ok, minor_error or major_error</td></tr>
-        <tr><td><code>age_group</code></td><td>18-39, 40-64 or 65+</td></tr>
-        <tr><td><code>sex</code></td><td>F or M</td></tr>
-        <tr><td><code>nationality_group</code></td><td>UAE national, Arab expatriate, South Asian expatriate, or Other expatriate</td></tr>
-      </table></div>
-    </div>
-  </div>
-  <div class="sec">
-    <h2>How the figures are calculated</h2>
-    <div class="cols2">
-      <div>
-        <p class="muted"><b style="color:var(--ink)">Sensitivity:</b> of the cases the clinician confirmed, the share the AI flagged. Missed cases lower it.</p>
-        <p class="muted"><b style="color:var(--ink)">Specificity:</b> of the cases without the condition, the share the AI correctly left alone. False alarms lower it.</p>
-        <p class="muted"><b style="color:var(--ink)">Major error rate:</b> for the record assistant, the share of reviewed summaries with an error a clinician judged could change care.</p>
-      </div>
-      <div>
-        <p class="muted">Each weekly point uses the four weeks up to that week, so one quiet week does not cause a false alarm. The first three points use fewer weeks.</p>
-        <p class="muted">A system needs <b style="color:var(--act)">action</b> when a figure is below its agreed floor. It is on <b style="color:#7A5300">watch</b> when a figure is within 2 points of the floor, or when one patient group is 5 or more points below the other patients, the difference is too large to be chance (a standard two-proportion test at the 99% level, which is strict because many groups are checked at once), and the group has at least 30 confirmed cases.</p>
-        <p class="muted">Floors are set by the hospital for each system. The ones here are examples.</p>
-      </div>
-    </div>
-  </div>
-</section>
-
-</main>
-<footer class="ft"><div class="wrap">Sentinel demo. Example General Hospital is fictional, vendor names are placeholders, and all data is made up. Risk method from the Department of Health Abu Dhabi Responsible AI Standard and Risk Management Protocol (October 2025).</div></footer>
-
+<!-- tour -->
+<div class="tour" id="tour" role="dialog" aria-live="polite" aria-labelledby="tTitle">
+  <div class="tt"><span class="stp" id="tStep"></span><button class="x" id="tClose" aria-label="Close the tour">&times;</button></div>
+  <h3 id="tTitle"></h3>
+  <p id="tText"></p>
+  <div class="ta"><div class="dots" id="tDots"></div><button class="btn ghost sm" id="tBack">Back</button><button class="btn sm" id="tNext">Next</button></div>
+</div>
 <script>
 "use strict";
 /* ---------------- configuration ---------------- */
@@ -415,49 +543,6 @@ const TABLE = {
 function exposureBand(ef){ return ef<=3?1:ef<=6?2:ef<=12?3:ef<=20?4:5; }
 function rate(crit,L,I){ const ef=L*I, b=exposureBand(ef), c=TABLE[crit][b]; return {ef,b,score:c[0],band:c[1]}; }
 
-const SYSTEMS = [
-  {id:"stroke",name:"Stroke detection",vendor:"Vendor A",use:"Flags suspected bleeding on head CT scans",dept:"Radiology",crit:3,type:"binary",
-   floors:{sens:.90,spec:.85},truth:"Neuroradiologist's final report",events:[{week:5,label:"CT scanner protocol updated"}],
-   gen:{n:60,p:.22,sens:w=>w<5?.94:.94-(w-4)*.02,spec:()=>.93,mod:{age_group:{"65+":-.04}}}},
-  {id:"chest",name:"Chest X-ray triage",vendor:"Vendor B",use:"Moves chest X-rays with likely abnormal findings up the reading list",dept:"Radiology",crit:3,type:"binary",
-   floors:{sens:.88,spec:.85},truth:"Radiologist's final report",events:[],
-   gen:{n:150,p:.18,sens:()=>.95,spec:()=>.895,mod:{nationality_group:{"South Asian expatriate":-.14}}}},
-  {id:"sepsis",name:"Sepsis alert",vendor:"Vendor C",use:"Alerts ward staff to patients at risk of sepsis",dept:"Inpatient wards",crit:3,type:"binary",
-   floors:{sens:.80,spec:.84},truth:"Sepsis confirmed by the treating team within 48 hours",events:[{week:3,label:"New lab system went live"}],
-   gen:{n:200,p:.08,sens:()=>.87,spec:w=>w<2?.91:Math.max(.845,.91-(w-2)*.01),mod:{}}},
-  {id:"triage",name:"Emergency triage score",vendor:"Built in-house",use:"Flags emergency patients likely to need urgent care",dept:"Emergency department",crit:3,type:"binary",
-   floors:{sens:.82,spec:.80},truth:"Final acuity recorded by the emergency team",events:[],
-   gen:{n:250,p:.12,sens:()=>.885,spec:()=>.865,mod:{}}},
-  {id:"assistant",name:"Patient-record assistant",vendor:"Vendor D",use:"Summarises a patient's record for the treating physician",dept:"All departments",crit:3,type:"review",
-   ceiling:.05,truth:"Clinician review of 25 sampled summaries each week",events:[],
-   gen:{n:25,mix:{ok:.85,minor_error:.12,major_error:.03}}}
-];
-const OTHER = [
-  {id:"coding",name:"Clinical coding assistant",vendor:"Vendor E",use:"Suggests billing codes from clinical notes",crit:2},
-  {id:"noshow",name:"Appointment no-show predictor",vendor:"Vendor F",use:"Predicts missed appointments for scheduling",crit:2},
-  {id:"spam",name:"Email spam filter",vendor:"Vendor G",use:"Filters staff email",crit:1}
-];
-const ALLSYS = SYSTEMS.concat(OTHER);
-const sysById = id => ALLSYS.find(s=>s.id===id);
-
-/* Register: written by the hospital's risk owners */
-const RISKS = [
-  {id:"R-01",sys:"stroke",risk:"Missed bleeds: sensitivity below the agreed floor since the scanner protocol change",L:4,I:5,controls:"Second read of all negative scans by the on-call radiologist; vendor asked to revalidate on the new protocol",rL:2,rI:5,decision:"Reduce",owner:"Head of Radiology",plan:"In progress",due:21},
-  {id:"R-02",sys:"chest",risk:"Lower sensitivity for one patient group",L:3,I:4,controls:"Local revalidation on a group-balanced sample; reporting radiologists alerted",rL:2,rI:3,decision:"Reduce",owner:"AI Governance Lead",plan:"In progress",due:35},
-  {id:"R-03",sys:"sepsis",risk:"Rising false alerts leading staff to ignore real ones",L:4,I:4,controls:"Alert threshold review with ward leads; weekly false-alert report",rL:3,rI:3,decision:"Reduce",owner:"Director of Nursing",plan:"In progress",due:28},
-  {id:"R-04",sys:"triage",risk:"Staff rely on the score without their own assessment",L:3,I:5,controls:"Monthly audit of overrides; training for emergency staff",rL:2,rI:4,decision:"Reduce",owner:"Head of Emergency",plan:"Completed",due:-30},
-  {id:"R-05",sys:"assistant",risk:"A summary leaves out or misstates a fact that matters for care",L:3,I:5,controls:"Weekly clinician review of sampled summaries; physician checks the record before acting",rL:2,rI:5,decision:"Reduce",owner:"Chief Medical Information Officer",plan:"Completed",due:-45},
-  {id:"R-06",sys:"assistant",risk:"Patient data processed or supported from outside the UAE",L:2,I:5,controls:"Contract requires UAE hosting and support; vendor confirmation on file",rL:1,rI:5,decision:"Reduce",owner:"Data Protection Officer",plan:"Completed",due:-60},
-  {id:"R-07",sys:"coding",risk:"Wrong billing codes suggested",L:3,I:3,controls:"Coder confirms every suggested code",rL:2,rI:3,decision:"Reduce",owner:"Head of Revenue Cycle",plan:"Completed",due:-20},
-  {id:"R-08",sys:"noshow",risk:"Less accurate for new patients",L:3,I:2,controls:"None beyond monitoring",rL:3,rI:2,decision:"Accept",owner:"Head of Outpatients",plan:"Not needed",due:null},
-  {id:"R-09",sys:"spam",risk:"Genuine email marked as spam",L:2,I:1,controls:"None beyond monitoring",rL:2,rI:1,decision:"Accept",owner:"IT Service Manager",plan:"Not needed",due:null}
-];
-/* Incident log: ethical incidents and near misses (Protocol KPI 2) */
-const INCIDENTS = [
-  {weekAgo:3,sys:"chest",kind:"Ethical near miss",text:"Sensitivity for one patient group found well below the rest",action:"Logged; local revalidation started (R-02)",status:"Open"}
-];
-const DEPLOYED_USE_CASES = ALLSYS.length;
-
 /* ---------------- utilities ---------------- */
 const $ = id => document.getElementById(id);
 const esc = s => String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
@@ -473,11 +558,70 @@ const AGE=[["18-39",.38],["40-64",.42],["65+",.20]], SEX=[["F",.46],["M",.54]],
 
 /* ---------------- sample data ---------------- */
 function lastSunday(){ const t=utcToday(); return new Date(t.getTime()-t.getUTCDay()*DAY); }
+/* ---------------- systems ---------------- */
+const SYSTEMS = [
+  {id:"stroke",name:"Stroke detection",vendor:"Vendor A",use:"Flags suspected bleeding on head CT scans",dept:"Radiology",crit:3,type:"binary",
+   floors:{sens:.90,spec:.85},truth:"Neuroradiologist's final report",events:[{week:5,label:"CT scanner protocol updated"}],
+   words:{who:"neuroradiologists",pos:"bleeds",posOne:"bleed",neg:"scans without a bleed",sens:"of confirmed bleeds caught",spec:"of scans without a bleed left alone"},
+   claim:{sens:.93,spec:.92},renew:4,extras:true,
+   gen:{n:60,p:.22,sens:w=>w<5?.94:.94-(w-4)*.02,spec:()=>.93,mod:{age_group:{"65+":-.04}}}},
+  {id:"chest",name:"Chest X-ray triage",vendor:"Vendor B",use:"Moves chest X-rays with likely abnormal findings up the reading list",dept:"Radiology",crit:3,type:"binary",
+   floors:{sens:.88,spec:.85},truth:"Radiologist's final report",events:[],
+   words:{who:"radiologists",pos:"abnormal X-rays",posOne:"abnormal X-ray",neg:"normal X-rays",sens:"of abnormal X-rays moved up the list",spec:"of normal X-rays left alone"},
+   claim:{sens:.95,spec:.91},renew:7,
+   gen:{n:150,p:.18,sens:()=>.95,spec:()=>.895,mod:{nationality_group:{"South Asian expatriate":-.14}}}},
+  {id:"sepsis",name:"Sepsis alert",vendor:"Vendor C",use:"Alerts ward staff to patients at risk of sepsis",dept:"Inpatient wards",crit:3,type:"binary",
+   floors:{sens:.80,spec:.84},truth:"Sepsis confirmed by the treating team within 48 hours",events:[{week:3,label:"New lab system went live"}],
+   words:{who:"the treating teams",pos:"sepsis cases",posOne:"sepsis case",neg:"patients without sepsis",sens:"of sepsis cases alerted",spec:"of patients without sepsis not alerted"},
+   claim:{sens:.88,spec:.90},renew:2,
+   gen:{n:200,p:.08,sens:()=>.87,spec:w=>w<2?.91:Math.max(.845,.91-(w-2)*.01),mod:{}}},
+  {id:"triage",name:"Emergency triage score",vendor:"Built in-house",use:"Flags emergency patients likely to need urgent care",dept:"Emergency department",crit:3,type:"binary",
+   floors:{sens:.82,spec:.80},truth:"Final acuity recorded by the emergency team",events:[],
+   words:{who:"the emergency team",pos:"urgent patients",posOne:"urgent patient",neg:"non-urgent patients",sens:"of urgent patients flagged",spec:"of non-urgent patients not flagged"},
+   claim:null,renew:null,
+   gen:{n:250,p:.12,sens:()=>.885,spec:()=>.865,mod:{}}},
+  {id:"assistant",name:"Patient-record assistant",vendor:"Vendor D",use:"Summarises a patient's record for the treating physician",dept:"All departments",crit:3,type:"review",
+   ceiling:.05,truth:"Clinician review of 25 sampled summaries each week",events:[],
+   words:{major:"of summaries with a major error"},
+   claim:{major:.02},renew:10,
+   gen:{n:25,mix:{ok:.85,minor_error:.12,major_error:.03}}}
+];
+const OTHER = [
+  {id:"coding",name:"Clinical coding assistant",vendor:"Vendor E",use:"Suggests billing codes from clinical notes",crit:2},
+  {id:"noshow",name:"Appointment no-show predictor",vendor:"Vendor F",use:"Predicts missed appointments for scheduling",crit:2},
+  {id:"spam",name:"Email spam filter",vendor:"Vendor G",use:"Filters staff email",crit:1}
+];
+let ADDED=[];
+const ALLSYS = () => SYSTEMS.concat(OTHER).concat(ADDED);
+const sysById = id => ALLSYS().find(s=>s.id===id);
+
+/* Register: written by the hospital's risk owners */
+const RISKS = [
+  {id:"R-01",sys:"stroke",risk:"Missed bleeds: sensitivity below the agreed floor since the scanner protocol change",L:4,I:5,controls:"Second read of all negative scans by the on-call radiologist; vendor asked to revalidate on the new protocol",rL:2,rI:5,decision:"Reduce",owner:"Head of Radiology",plan:"In progress",due:21},
+  {id:"R-02",sys:"chest",risk:"Lower sensitivity for one patient group",L:3,I:4,controls:"Local revalidation on a group-balanced sample; reporting radiologists alerted",rL:2,rI:3,decision:"Reduce",owner:"AI Governance Lead",plan:"In progress",due:35},
+  {id:"R-03",sys:"sepsis",risk:"Rising false alerts leading staff to ignore real ones",L:4,I:4,controls:"Alert threshold review with ward leads; weekly false-alert report",rL:3,rI:3,decision:"Reduce",owner:"Director of Nursing",plan:"In progress",due:28},
+  {id:"R-04",sys:"triage",risk:"Staff rely on the score without their own assessment",L:3,I:5,controls:"Monthly audit of overrides; training for emergency staff",rL:2,rI:4,decision:"Reduce",owner:"Head of Emergency",plan:"Completed",due:-30},
+  {id:"R-05",sys:"assistant",risk:"A summary leaves out or misstates a fact that matters for care",L:3,I:5,controls:"Weekly clinician review of sampled summaries; physician checks the record before acting",rL:2,rI:5,decision:"Reduce",owner:"Chief Medical Information Officer",plan:"Completed",due:-45},
+  {id:"R-06",sys:"assistant",risk:"Patient data processed or supported from outside the UAE",L:2,I:5,controls:"Contract requires UAE hosting and support; vendor confirmation on file",rL:1,rI:5,decision:"Reduce",owner:"Data Protection Officer",plan:"Completed",due:-60},
+  {id:"R-07",sys:"coding",risk:"Wrong billing codes suggested",L:3,I:3,controls:"Coder confirms every suggested code",rL:2,rI:3,decision:"Reduce",owner:"Head of Revenue Cycle",plan:"Completed",due:-20},
+  {id:"R-08",sys:"noshow",risk:"Less accurate for new patients",L:3,I:2,controls:"None beyond monitoring",rL:3,rI:2,decision:"Accept",owner:"Head of Outpatients",plan:"Not needed",due:null},
+  {id:"R-09",sys:"spam",risk:"Genuine email marked as spam",L:2,I:1,controls:"None beyond monitoring",rL:2,rI:1,decision:"Accept",owner:"IT Service Manager",plan:"Not needed",due:null}
+];
+const INCIDENTS = [
+  {weekAgo:3,sys:"chest",kind:"Ethical near miss",text:"Sensitivity for one patient group found well below the rest",action:"Logged; local revalidation started (R-02)",status:"Open"}
+];
+const useCases = () => ALLSYS().length;
+
+/* ---------------- sample data ---------------- */
+const SCANNERS=["CT scanner 1","CT scanner 2"];
+const BLEEDS=["Thin subdural","Focal subarachnoid","Small, within brain tissue","Larger bleed"];
 function generateSample(){
   /* Weekly totals follow the intended rates exactly; which cases are missed is random,
-     weighted by each case's own chance, so only the groups meant to differ will differ. */
-  const r=mulberry32(20261113), end=lastSunday(), rows=[];
+     weighted by each case's own chance, so only the groups meant to differ will differ.
+     Case details (scanner, bleed type) come from a second generator, so they never change the figures. */
+  const r=mulberry32(20261113), r2=mulberry32(7771), end=lastSunday(), rows=[];
   const takeWeighted=(items,weights,k)=>items.map((it,i)=>({it,key:weights[i]>0?Math.pow(r(),1/weights[i]):-1})).sort((a,b)=>b.key-a.key).slice(0,k).map(x=>x.it);
+  const pickW=(opts)=>{ let x=r2(),acc=0; for(const [k,w] of opts){ acc+=w; if(x<acc) return k; } return opts[opts.length-1][0]; };
   for(const s of SYSTEMS){
     let carryM=0, carryF=0; const carryR={minor_error:0,major_error:0};
     for(let w=0;w<12;w++){
@@ -506,6 +650,16 @@ function generateSample(){
         const fq=1-s.gen.spec(w); exp=carryF+neg.length*fq; const F=Math.round(exp); carryF=exp-F;
         const fals=new Set(takeWeighted(neg,neg.map(()=>1),F));
         neg.forEach(c=>{ c.clinician_finding=0; c.ai_output=fals.has(c)?1:0; });
+        if(s.extras){
+          cases.forEach(c=>{
+            const miss=c.clinician_finding===1&&c.ai_output===0;
+            const after=w>=5;
+            c.scanner = miss&&after ? pickW([["CT scanner 2",.85],["CT scanner 1",.15]]) : pickW([["CT scanner 1",.56],["CT scanner 2",.44]]);
+            if(c.clinician_finding===1) c.finding_type = miss ? pickW([["Thin subdural",.34],["Focal subarachnoid",.24],["Small, within brain tissue",.30],["Larger bleed",.12]])
+                                                              : pickW([["Thin subdural",.22],["Focal subarachnoid",.14],["Small, within brain tissue",.24],["Larger bleed",.40]]);
+            else c.finding_type="none";
+          });
+        }
       }
       cases.sort((a,b)=>a.date<b.date?-1:a.date>b.date?1:0).forEach(c=>rows.push(c));
     }
@@ -513,19 +667,21 @@ function generateSample(){
   return rows;
 }
 const COLS=["system_id","date","ai_output","clinician_finding","age_group","sex","nationality_group"];
-function toCSV(rows){ return COLS.join(",")+"\n"+rows.map(o=>COLS.map(c=>o[c]).join(",")).join("\n")+"\n"; }
+const OPT=["scanner","finding_type"];
+function toCSV(rows){ const c=COLS.concat(OPT); return c.join(",")+"\n"+rows.map(o=>c.map(k=>o[k]==null?"":o[k]).join(",")).join("\n")+"\n"; }
 function parseCSV(text){
   const lines=text.replace(/\r/g,"").split("\n").filter(l=>l.trim()!=="");
   if(!lines.length) return {error:"The file is empty."};
   const head=lines[0].split(",").map(h=>h.trim().toLowerCase());
   const missing=COLS.filter(c=>!head.includes(c));
   if(missing.length) return {error:"The file is missing these columns: "+missing.join(", ")+". Download the sample file to see the expected layout."};
-  const idx=Object.fromEntries(COLS.map(c=>[c,head.indexOf(c)]));
+  const idx=Object.fromEntries(COLS.concat(OPT).map(c=>[c,head.indexOf(c)]));
   const ids=new Set(SYSTEMS.map(s=>s.id)), rows=[], bad=[];
   const okAge=new Set(AGE.map(a=>a[0])), okSex=new Set(["F","M"]), okNat=new Set(NAT.map(a=>a[0])), okRev=new Set(["ok","minor_error","major_error"]);
   for(let i=1;i<lines.length;i++){
     const f=lines[i].split(",").map(x=>x.trim());
     const o={}; COLS.forEach(c=>o[c]=f[idx[c]]);
+    OPT.forEach(c=>{ if(idx[c]>=0&&f[idx[c]]) o[c]=f[idx[c]]; });
     let why="";
     if(!ids.has(o.system_id)) why="unknown system_id";
     else if(!/^\d{4}-\d{2}-\d{2}$/.test(o.date||"")||isNaN(Date.parse(o.date))) why="date is not YYYY-MM-DD";
@@ -540,6 +696,14 @@ function parseCSV(text){
 }
 
 /* ---------------- analysis ---------------- */
+function judge(pos,sens,restSens,tpAll,posAll){
+  // same rule everywhere: at least 30 confirmed cases, 5 or more points below the rest, and too large to be chance (99% level)
+  const gap=(sens!=null&&restSens!=null)?restSens-sens:null;
+  let z=0; const rpos=posAll-pos;
+  if(gap!=null&&pos&&rpos){ const pp=tpAll/posAll, se=Math.sqrt(pp*(1-pp)*(1/pos+1/rpos)); z=se?gap/se:0; }
+  const verdict = pos<30 ? "few" : (gap!=null&&gap>=.05&&z>=2.58) ? "pat" : (gap!=null&&gap>=.05) ? "chance" : "in";
+  return {gap,z,verdict,flag:verdict==="pat"};
+}
 function analyse(rows){
   const maxT=Math.max(...rows.map(o=>Date.parse(o.date)));
   const end=new Date(maxT);
@@ -558,18 +722,22 @@ function analyse(rows){
     for(let w=0;w<12;w++){ const win=[].concat(...wk.slice(Math.max(0,w-3),w+1)); A.weeks.push(agg(win)); }
     A.latest=A.weeks[11];
     A.latestWindow=[].concat(...wk.slice(8,12));
-    // groups over 12 weeks
+    A.all=agg(rs);
     if(s.type==="binary"){
-      const all=agg(rs); A.all=all; A.groups=[];
-      for(const [col,opts] of [["age_group",AGE],["sex",SEX],["nationality_group",NAT]]){
-        for(const [v] of opts){
-          const g=agg(rs.filter(o=>o[col]===v)), rest=agg(rs.filter(o=>o[col]!==v));
-          const pos=g.tp+g.fn, rpos=rest.tp+rest.fn;
-          const gap=(g.sens!=null&&rest.sens!=null)?(rest.sens-g.sens):null;
-          // two-proportion z-test: is the group's lower sensitivity too large to be chance?
-          let z=0; if(gap!=null&&pos&&rpos){ const pp=(g.tp+rest.tp)/(pos+rpos), se=Math.sqrt(pp*(1-pp)*(1/pos+1/rpos)); z=se?gap/se:0; }
-          A.groups.push({col,v,pos,sens:g.sens,restSens:rest.sens,gap,z,enough:pos>=30,flag:pos>=30&&gap!=null&&gap>=.05&&z>=2.58});
-        }
+      const all=A.all; A.groups=[];
+      const breakdown=(keyFn,values,col)=>values.map(v=>{
+        const g=agg(rs.filter(o=>keyFn(o)===v)), rest=agg(rs.filter(o=>keyFn(o)!==v));
+        const pos=g.tp+g.fn;
+        const j=judge(pos,g.sens,rest.sens,all.tp,all.tp+all.fn);
+        return {col,v,pos,missed:g.fn,sens:g.sens,restSens:rest.sens,...j};
+      }).filter(x=>x.pos>0);
+      for(const [col,opts] of [["age_group",AGE],["sex",SEX],["nationality_group",NAT]]) A.groups.push(...breakdown(o=>o[col],opts.map(x=>x[0]),col));
+      const ev=(s.events[0]||{}).week;
+      const hasExtras=rs.some(o=>o.scanner);
+      if(hasExtras){
+        const scanKey=o=>o.scanner==="CT scanner 2" ? (ev!=null&&o.w>=ev?"CT scanner 2, after the protocol update":"CT scanner 2, before the update") : (o.scanner||"Not recorded");
+        A.byScanner=breakdown(scanKey,["CT scanner 1","CT scanner 2, before the update","CT scanner 2, after the protocol update"],"scanner");
+        A.byType=breakdown(o=>o.finding_type,BLEEDS,"finding_type");
       }
       const L=A.latest, f=s.floors;
       const below=[], near=[];
@@ -578,11 +746,13 @@ function analyse(rows){
       const flagged=A.groups.filter(g=>g.flag);
       A.below=below; A.near=near; A.flagged=flagged;
       A.status=below.length?"act":(near.length||flagged.length)?"watch":"ok";
-      // weeks below floor in a row
       let run=0; for(let w=11;w>=0;w--){ const x=A.weeks[w]; if((x.sens!=null&&x.sens<f.sens)||(x.spec!=null&&x.spec<f.spec)) run++; else break; } A.runBelow=run;
+      A.focus = (below.includes("spec")||near.includes("spec"))&&!below.includes("sens")&&!near.includes("sens") ? "spec" : "sens";
+      const lw=A.latest; A.alertsPerReal = lw.tp ? (lw.tp+lw.fp)/lw.tp : null;
+      A.missedRecent = A.latestWindow.filter(o=>o.clinician_finding===1&&o.ai_output===0).sort((a,b)=>a.date<b.date?1:-1);
     } else {
       const m=A.latest.major; A.status=m==null?"na":m>s.ceiling?"act":(s.ceiling-m)<.01?"watch":"ok";
-      A.below=m>s.ceiling?["major"]:[]; A.near=[]; A.flagged=[];
+      A.below=m>s.ceiling?["major"]:[]; A.near=[]; A.flagged=[]; A.focus="major";
     }
     out.bySys[s.id]=A;
   }
@@ -590,177 +760,267 @@ function analyse(rows){
 }
 
 /* ---------------- state ---------------- */
-let DATA=null, RESULT=null, SOURCE={name:"Built-in sample file",sample:true}, CURRENT="stroke";
+let DATA=null, RESULT=null, SOURCE={name:"Built-in sample file",sample:true}, CURRENT="stroke", SAMPLE=null, VIEW="home", STAB="perf";
 function load(rows,source){ DATA=rows; RESULT=analyse(rows); SOURCE=source; renderAll(); }
 
-/* ---------------- rendering helpers ---------------- */
+/* ---------------- helpers ---------------- */
 const STATUS={ok:["p-ok","Within floor"],watch:["p-watch","Watch"],act:["p-act","Action needed"],na:["p-na","No data"]};
 const pill=st=>`<span class="pill ${STATUS[st][0]}"><i></i>${STATUS[st][1]}</span>`;
 const bandTag=b=>`<span class="band b-${b}">${BANDNAME[b]}</span>`;
-function metricCell(v,floor,isCeil){
-  if(v==null) return '<span class="muted">n/a</span>';
-  let cls=""; if(isCeil){ if(v>floor) cls="below"; } else { if(v<floor) cls="below"; else if(v-floor<.02) cls="near"; }
-  return `<span class="${cls}">${pct(v)}</span> <span class="muted small">${isCeil?"limit":"floor"} ${pct(floor,0)}</span>`;
-}
+const pct0=v=>v==null?"n/a":Math.round(v*100)+"%";
+const plural=(n,one,many)=>n===1?one:many;
+const VERD={pat:["v-pat","Likely pattern"],few:["v-few","Too few cases to judge yet"],chance:["v-ch","Could be chance"],in:["v-in","In line"]};
+function weekLabel(w){ const d=new Date(RESULT.end.getTime()-(11-w)*7*DAY); return d.toLocaleDateString("en-GB",{day:"numeric",month:"short",timeZone:"UTC"}); }
+function weekDate(w){ return new Date(RESULT.end.getTime()-(11-w)*7*DAY); }
+function addMonths(m){ const t=utcToday(); return new Date(Date.UTC(t.getUTCFullYear(),t.getUTCMonth()+m,1)); }
+function monthYear(d){ return d.toLocaleDateString("en-GB",{month:"short",year:"numeric",timeZone:"UTC"}); }
+function mainValue(a){ const s=a.sys, L=a.latest; if(s.type==="review") return L.major; return a.focus==="spec"?L.spec:L.sens; }
+function mainFloor(a){ const s=a.sys; return s.type==="review"?s.ceiling:s.floors[a.focus]; }
+function mainWords(a){ const s=a.sys; return s.type==="review"?s.words.major:s.words[a.focus]; }
+function mainTech(a){ return a.sys.type==="review"?"Major error rate":a.focus==="spec"?"Specificity":"Sensitivity"; }
 function spark(vals,floor,isCeil){
-  const W=120,H=34,p=3, v=vals.filter(x=>x!=null);
+  const W=132,H=36,p=3, v=vals.filter(x=>x!=null);
   if(!v.length) return "";
   let lo=Math.min(...v,floor)-.01, hi=Math.max(...v,floor)+.01;
   const x=i=>p+(W-2*p)*i/(vals.length-1), y=val=>H-p-(H-2*p)*(val-lo)/(hi-lo);
   const pts=vals.map((val,i)=>val==null?null:`${x(i).toFixed(1)},${y(val).toFixed(1)}`).filter(Boolean).join(" ");
   const last=vals[vals.length-1], bad=isCeil?last>floor:last<floor;
-  return `<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" aria-hidden="true"><line x1="${p}" x2="${W-p}" y1="${y(floor)}" y2="${y(floor)}" stroke="#B07800" stroke-dasharray="3 3" stroke-width="1"/><polyline points="${pts}" fill="none" stroke="#0B6B6B" stroke-width="1.8"/><circle cx="${x(vals.length-1)}" cy="${y(last)}" r="3" fill="${bad?"#C8372D":"#0B6B6B"}"/></svg>`;
+  return `<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" aria-hidden="true"><line x1="${p}" x2="${W-p}" y1="${y(floor)}" y2="${y(floor)}" stroke="#A86F00" stroke-dasharray="3 3" stroke-width="1"/><polyline points="${pts}" fill="none" stroke="#0B6B6B" stroke-width="1.8"/><circle cx="${x(vals.length-1)}" cy="${y(last)}" r="3.2" fill="${bad?"#C8372D":"#0B6B6B"}"/></svg>`;
 }
-function weekLabel(w){ const d=new Date(RESULT.end.getTime()-(11-w)*7*DAY); return d.toLocaleDateString("en-GB",{day:"numeric",month:"short",timeZone:"UTC"}); }
+function trendVals(a){ const s=a.sys; return s.type==="review"?a.weeks.map(w=>w.major):a.weeks.map(w=>a.focus==="spec"?w.spec:w.sens); }
+function riskOf(id){ return RISKS.filter(r=>r.sys===id); }
+function dueDate(r){ return r.due==null?null:new Date(utcToday().getTime()+r.due*DAY); }
 
-/* ---------------- overview ---------------- */
-function renderOverview(){
-  const A=RESULT.bySys, st=SYSTEMS.map(s=>A[s.id].status);
-  const k=kpis();
-  $("ovLead").textContent=`Results cover the 12 weeks from ${fmtDate(RESULT.start)} to ${fmtDate(RESULT.end)}. Data: ${SOURCE.name}, ${DATA.length.toLocaleString()} cases.`;
-  $("introRows").textContent=DATA.length.toLocaleString();
-  $("stats").innerHTML=[
-    [ALLSYS.length,"AI systems in use","All listed in the register"],
-    [SYSTEMS.length,"Under performance monitoring","Checked against agreed floors"],
-    [st.filter(x=>x==="act").length,"Need action now","A figure is below its floor"],
-    [st.filter(x=>x==="watch").length,"On watch","Close to a floor, or a group gap"],
-    [pct(k.k2,1),"AI ethical incident rate","DoH threshold: below 15%"]
-  ].map(([n,l,s])=>`<div class="stat"><div class="n">${n}</div><div class="l">${l}</div><div class="s">${s}</div></div>`).join("");
+/* ---------------- home ---------------- */
+function renderHome(){
+  const A=RESULT.bySys, st=SYSTEMS.map(s=>A[s.id].status), n=c=>st.filter(x=>x===c).length;
+  $("homeWeek").textContent=`Week ending ${fmtDate(RESULT.end)}`;
+  $("statusLine").innerHTML=`<span><b>${ALLSYS().length}</b> AI systems in use</span><span><b>${SYSTEMS.length}</b> checked weekly</span>
+    <span><span class="dot" style="background:var(--act)"></span><b>${n("act")}</b> ${plural(n("act"),"needs","need")} action</span>
+    <span><span class="dot" style="background:var(--watch)"></span><b>${n("watch")}</b> on watch</span>
+    <span><span class="dot" style="background:var(--ok)"></span><b>${n("ok")}</b> within floor</span>`;
   const order={act:0,watch:1,ok:2,na:3};
-  const sorted=SYSTEMS.slice().sort((a,b)=>order[A[a.id].status]-order[A[b.id].status]);
-  $("ovTable").innerHTML=`<tr><th>System</th><th class="hide-sm">Supplier</th><th>Sensitivity</th><th>Specificity</th><th class="hide-sm">12-week trend</th><th>Status</th><th></th></tr>`+
-   sorted.map(s=>{ const a=A[s.id], L=a.latest;
-     const m1= s.type==="review" ? `<td colspan="2">Major error rate ${metricCell(L.major,s.ceiling,true)}</td>` : `<td>${metricCell(L.sens,s.floors.sens)}</td><td>${metricCell(L.spec,s.floors.spec)}</td>`;
-     const trendVals = s.type==="review" ? a.weeks.map(w=>w.major) : a.weeks.map(w=> (a.below.includes("spec")||a.near.includes("spec"))&&!a.below.includes("sens") ? w.spec : w.sens);
-     const trendFloor = s.type==="review" ? s.ceiling : ((a.below.includes("spec")||a.near.includes("spec"))&&!a.below.includes("sens") ? s.floors.spec : s.floors.sens);
-     return `<tr class="click" tabindex="0" data-sys="${s.id}"><td><div class="sname">${esc(s.name)}</div><div class="ssub">${esc(s.use)}</div></td><td class="hide-sm">${esc(s.vendor)}</td>${m1}<td class="hide-sm">${spark(trendVals,trendFloor,s.type==="review")}</td><td>${pill(a.status)}</td><td class="go" aria-hidden="true">&rsaquo;</td></tr>`;
-   }).join("");
-  $("ovOther").innerHTML=`<tr><th>System</th><th class="hide-sm">Supplier</th><th>Criticality</th><th>Register entry</th></tr>`+
-   OTHER.map(s=>{ const r=RISKS.find(x=>x.sys===s.id); const rr=rate(s.crit,r.rL,r.rI);
-     return `<tr><td><div class="sname">${esc(s.name)}</div><div class="ssub">${esc(s.use)}</div></td><td class="hide-sm">${esc(s.vendor)}</td><td>${CRIT[s.crit]}</td><td>${r.id}: rated ${rr.score} ${bandTag(rr.band)}</td></tr>`; }).join("");
+  $("homeCards").innerHTML=SYSTEMS.slice().sort((a,b)=>order[A[a.id].status]-order[A[b.id].status]).map(s=>{
+    const a=A[s.id], v=mainValue(a), fl=mainFloor(a), isC=s.type==="review";
+    const bad=isC?v>fl:v<fl;
+    return `<article class="card scard ${a.status}" tabindex="0" role="button" data-sys="${s.id}" aria-label="${esc(s.name)}: ${STATUS[a.status][1]}">
+      <div class="top"><div><h3>${esc(s.name)}</h3><div class="use">${esc(s.use)}</div></div>${pill(a.status)}</div>
+      <div class="res"><b class="${bad?"below":""}">${pct(v)}</b> ${esc(mainWords(a))}<span class="tech">${mainTech(a)} &middot; ${isC?"limit":"floor"} ${pct0(fl)} &middot; last four weeks</span></div>
+      <div class="bot"><span>${esc(s.vendor)}</span>${spark(trendVals(a),fl,isC)}</div></article>`;
+  }).join("");
+  $("homeOther").innerHTML=OTHER.concat(ADDED).map(s=>{ const r=RISKS.find(x=>x.sys===s.id); const rr=r?rate(s.crit,r.rL,r.rI):null;
+    return `<div class="card orow"><div><b>${esc(s.name)}</b><div class="use">${esc(s.use)}</div></div>${rr?`<span class="small soft">Rated ${rr.score} ${bandTag(rr.band)}</span>`:""}</div>`; }).join("");
+  const c=n("act"); $("navCnt").textContent=c?c:""; $("navCnt").style.display=c?"":"none";
+}
+
+/* ---------------- systems list ---------------- */
+function renderSystems(){
+  const A=RESULT.bySys;
+  $("sysTable").innerHTML=`<thead><tr class="th"><th>System</th><th>Supplier</th><th>Checked</th><th>Latest result</th><th>Status</th></tr></thead><tbody>`+
+    SYSTEMS.map(s=>{ const a=A[s.id];
+      return `<tr style="cursor:pointer" data-sys="${s.id}" tabindex="0"><td data-l="System"><div class="sname">${esc(s.name)}</div><div class="ssub">${esc(s.use)}</div></td><td data-l="Supplier">${esc(s.vendor)}</td><td data-l="Checked">Weekly</td><td data-l="Latest result">${pct(mainValue(a))} <span class="ssub">${esc(mainWords(a))}</span></td><td data-l="Status">${pill(a.status)}</td></tr>`; }).join("")+
+    OTHER.concat(ADDED).map(s=>{ const r=RISKS.find(x=>x.sys===s.id), rr=r?rate(s.crit,r.rL,r.rI):null;
+      return `<tr><td data-l="System"><div class="sname">${esc(s.name)}</div><div class="ssub">${esc(s.use)}</div></td><td data-l="Supplier">${esc(s.vendor)}</td><td data-l="Checked">Register only</td><td data-l="Latest result"><span class="muted">Not monitored weekly</span></td><td data-l="Risk rating">${rr?`${rr.score} ${bandTag(rr.band)}`:""}</td></tr>`; }).join("")+`</tbody>`;
 }
 
 /* ---------------- system detail ---------------- */
 function chartSVG(a){
-  const s=a.sys, cw=($("sdChart").clientWidth||640), W=Math.max(340,Math.min(640,cw)), H=W<500?260:300, pl=44,pr=12,pt=26,pb=40, pw=W-pl-pr, ph=H-pt-pb;
+  const s=a.sys, cw=($("sdChart").clientWidth||640), W=Math.max(320,Math.min(700,cw)), H=W<500?250:290, pl=44,pr=12,pt=28,pb=36, pw=W-pl-pr, ph=H-pt-pb;
   let series, lines, lo, hi;
   if(s.type==="review"){
-    series=[{vals:a.weeks.map(w=>w.major),col:"#0B6B6B",name:"Major error rate"}];
-    lines=[{v:s.ceiling,label:`Limit ${pct(s.ceiling,0)}`}]; lo=0; hi=Math.max(.08,...a.weeks.map(w=>w.major||0))+.01;
+    series=[{vals:a.weeks.map(w=>w.major),col:"#0B6B6B"}];
+    lines=[{v:s.ceiling}]; lo=0; hi=Math.max(.08,...a.weeks.map(w=>w.major||0))+.01;
   } else {
-    series=[{vals:a.weeks.map(w=>w.sens),col:"#0B6B6B",name:"Sensitivity"},{vals:a.weeks.map(w=>w.spec),col:"#7C8B93",name:"Specificity",dash:"6 4"}];
-    lines=[{v:s.floors.sens,label:`Sensitivity floor ${pct(s.floors.sens,0)}`},{v:s.floors.spec,label:`Specificity floor ${pct(s.floors.spec,0)}`}];
+    series=[{vals:a.weeks.map(w=>w.sens),col:"#0B6B6B"},{vals:a.weeks.map(w=>w.spec),col:"#8A9AA1",dash:"6 4"}];
+    lines=[{v:s.floors.sens},{v:s.floors.spec}];
     const all=[].concat(...series.map(x=>x.vals)).filter(v=>v!=null).concat(lines.map(l=>l.v));
     lo=Math.floor((Math.min(...all)-.02)*50)/50; hi=Math.min(1,Math.ceil((Math.max(...all)+.02)*50)/50);
   }
   const x=i=>pl+pw*i/11, y=v=>pt+ph*(1-(v-lo)/(hi-lo));
   let g="";
   const step=(hi-lo)>.15?.05:.02;
-  for(let v=Math.ceil(lo/step)*step; v<=hi+1e-9; v+=step){ g+=`<line x1="${pl}" x2="${W-pr}" y1="${y(v)}" y2="${y(v)}" stroke="#E8EDEF"/><text x="${pl-8}" y="${y(v)+4}" text-anchor="end" font-size="12" fill="#7C8B93">${Math.round(v*100)}%</text>`; }
-  for(let i=0;i<12;i+=(W<500?3:2)){ if(W<500&&i===9) continue; g+=`<text x="${x(i)}" y="${H-pb+20}" text-anchor="middle" font-size="12" fill="#7C8B93">${weekLabel(i)}</text>`; }
-  g+=`<text x="${x(11)+4}" y="${H-pb+20}" text-anchor="end" font-size="12" fill="#7C8B93">${weekLabel(11)}</text>`;
-  (s.events||[]).forEach(e=>{ const xx=x(e.week); g+=`<line x1="${xx}" x2="${xx}" y1="${pt-6}" y2="${pt+ph}" stroke="#10212B" stroke-width="1" stroke-dasharray="2 3"/><text x="${xx>W*0.55?xx-5:xx+5}" y="${pt-10}" text-anchor="${xx>W*0.55?"end":"start"}" font-size="12" fill="#10212B">${esc(e.label)}</text>`; });
-  lines.forEach((l,i)=>{ g+=`<line x1="${pl}" x2="${W-pr}" y1="${y(l.v)}" y2="${y(l.v)}" stroke="#B07800" stroke-width="1.5" stroke-dasharray="5 4"/>`; });
-  series.forEach(se=>{
-    const pts=se.vals.map((v,i)=>v==null?null:`${x(i)},${y(v)}`).filter(Boolean).join(" ");
-    g+=`<polyline points="${pts}" fill="none" stroke="${se.col}" stroke-width="2.5" ${se.dash?`stroke-dasharray="${se.dash}"`:""}/>`;
-  });
-  // points below floor
+  for(let v=Math.ceil(lo/step)*step; v<=hi+1e-9; v+=step){ g+=`<line x1="${pl}" x2="${W-pr}" y1="${y(v)}" y2="${y(v)}" stroke="#ECF0F1"/><text x="${pl-8}" y="${y(v)+4}" text-anchor="end" font-size="12" fill="#7C8B93">${Math.round(v*100)}%</text>`; }
+  for(let i=0;i<12;i+=(W<500?3:2)){ if(i>=10) continue; g+=`<text x="${x(i)}" y="${H-pb+20}" text-anchor="middle" font-size="12" fill="#7C8B93">${weekLabel(i)}</text>`; }
+  g+=`<text x="${x(11)}" y="${H-pb+20}" text-anchor="end" font-size="12" fill="#7C8B93">${weekLabel(11)}</text>`;
+  (s.events||[]).forEach(e=>{ const xx=x(e.week); g+=`<line x1="${xx}" x2="${xx}" y1="${pt-8}" y2="${pt+ph}" stroke="#10212B" stroke-width="1" stroke-dasharray="2 3"/><text x="${xx>W*0.55?xx-5:xx+5}" y="${pt-12}" text-anchor="${xx>W*0.55?"end":"start"}" font-size="12" fill="#10212B">${esc(e.label)}</text>`; });
+  lines.forEach(l=>{ g+=`<line x1="${pl}" x2="${W-pr}" y1="${y(l.v)}" y2="${y(l.v)}" stroke="#A86F00" stroke-width="1.5" stroke-dasharray="5 4"/>`; });
+  series.forEach(se=>{ const pts=se.vals.map((v,i)=>v==null?null:`${x(i)},${y(v)}`).filter(Boolean).join(" "); g+=`<polyline points="${pts}" fill="none" stroke="${se.col}" stroke-width="2.5" ${se.dash?`stroke-dasharray="${se.dash}"`:""}/>`; });
   series.forEach((se,si)=>{ se.vals.forEach((v,i)=>{ if(v==null) return; const fl=lines[Math.min(si,lines.length-1)].v; const bad=s.type==="review"?v>fl:v<fl; g+=`<circle cx="${x(i)}" cy="${y(v)}" r="${bad?4.5:3}" fill="${bad?"#C8372D":se.col}" stroke="#fff" stroke-width="1.2"/>`; }); });
-  return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Performance chart for ${esc(s.name)}">${g}</svg>`;
+  return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Performance over 12 weeks for ${esc(s.name)}">${g}</svg>`;
+}
+function findingText(a){
+  const s=a.sys, L=a.latest;
+  if(s.type==="review"){
+    const t1=a.status==="act"?`Action needed: ${pct(L.major)} of summaries had a major error, above the ${pct0(s.ceiling)} limit.`:`Within its limit: ${pct(L.major)} of summaries had a major error, against a ${pct0(s.ceiling)} limit.`;
+    return [t1,`Based on ${L.n} summaries reviewed by clinicians in the last four weeks.`];
+  }
+  const fl=s.floors, w=s.words, parts=[];
+  if(a.below.includes("sens")) parts.push(`${pct(L.sens)} ${w.sens}, below the ${pct0(fl.sens)} floor`);
+  if(a.below.includes("spec")) parts.push(`${pct(L.spec)} ${w.spec}, below the ${pct0(fl.spec)} floor`);
+  if(a.near.includes("sens")) parts.push(`${pct(L.sens)} ${w.sens}, close to the ${pct0(fl.sens)} floor`);
+  if(a.near.includes("spec")) parts.push(`${pct(L.spec)} ${w.spec}, close to the ${pct0(fl.spec)} floor, so false alerts are rising`);
+  const grp=a.flagged.map(g=>`${g.v==="F"?"female":g.v==="M"?"male":g.v} patients (${pct(g.sens)} against ${pct(g.restSens)} for other patients)`);
+  let t1;
+  if(a.status==="act") t1=`Action needed: ${parts.join(" and ")}.`;
+  else if(a.status==="watch") t1=`On watch: ${parts.length?parts.join(" and "):"its overall figures are within their floors"}${grp.length?`${parts.length?", and ":", but "}it catches fewer cases for ${grp.join(" and ")}`:""}.`;
+  else t1=`Within its floors over the last four weeks, with no patient group falling behind.`;
+  const t2 = a.status==="act" ? `Below its floor for the last ${a.runBelow} ${plural(a.runBelow,"week","weeks")}${s.events.length?`. The decline began after the change marked on the chart (${esc(s.events[0].label)})`:""}. Under the Standard, a significant decline must trigger review and corrective action (clause 3.1.3.1.4).`
+       : a.status==="watch" ? `Flagged early so the hospital can act before a floor is crossed. The Standard requires monitoring after go-live (clause 3.1.3.1.3) and checks for bias (clause 3.1.5.1).`
+       : `Checked again next week.`;
+  return [t1,t2];
 }
 function renderSystem(){
-  const a=RESULT.bySys[CURRENT], s=a.sys;
-  $("sdPick").innerHTML=SYSTEMS.map(x=>`<option value="${x.id}" ${x.id===CURRENT?"selected":""}>${esc(x.name)}</option>`).join("");
-  $("sdName").textContent=s.name;
-  $("sdSub").textContent=`${s.vendor}. ${s.use}.`;
-  $("sdFacts").innerHTML=[["Status",pill(a.status)],["Criticality",CRIT[s.crit]+" ("+s.crit+")"],["Department",esc(s.dept)],["Checked against",esc(s.truth)],["Cases in 12 weeks",a.n.toLocaleString()]]
-    .map(([l,v])=>`<div class="fact">${l}<b>${v}</b></div>`).join("");
-  // finding
-  const f=$("sdFinding"); f.className="finding "+(a.status==="act"?"":a.status==="watch"?"watch":"ok");
-  let t1="",t2="";
-  if(s.type==="review"){
-    t1=a.status==="act"?`The major error rate is ${pct(a.latest.major)}, above the ${pct(s.ceiling,0)} limit.`:`The major error rate is ${pct(a.latest.major)}, within the ${pct(s.ceiling,0)} limit.`;
-    t2=`Based on ${a.latest.n} summaries reviewed by clinicians in the last four weeks.`;
-  } else {
-    const L=a.latest, fl=s.floors, parts=[];
-    if(a.below.includes("sens")) parts.push(`sensitivity is ${pct(L.sens)}, below the ${pct(fl.sens,0)} floor`);
-    if(a.below.includes("spec")) parts.push(`specificity is ${pct(L.spec)}, below the ${pct(fl.spec,0)} floor`);
-    if(a.near.includes("sens")) parts.push(`sensitivity is ${pct(L.sens)}, close to the ${pct(fl.sens,0)} floor`);
-    if(a.near.includes("spec")) parts.push(`specificity is ${pct(L.spec)}, close to the ${pct(fl.spec,0)} floor, so false alerts are rising`);
-    const grp=a.flagged.map(g=>`${g.v} patients (${pct(g.sens)} against ${pct(g.restSens)} for other patients)`);
-    if(a.status==="act") t1=`Action needed: ${parts.join(" and ")}.`;
-    else if(a.status==="watch") t1=`On watch: ${parts.length?parts.join(" and "):"overall figures are within their floors"}${grp.length?`${parts.length?", and ":", but "}sensitivity is lower for ${grp.join(" and ")}`:""}.`;
-    else t1=`Within its floors: sensitivity ${pct(L.sens)} and specificity ${pct(L.spec)} over the last four weeks, with no patient group falling behind.`;
-    t2 = a.status==="act" ? `Below its floor for the last ${a.runBelow} week${a.runBelow===1?"":"s"}${s.events.length?`. The decline began after the change marked on the chart: ${esc(s.events[0].label)}`:""}. Under the Standard, a significant decline must trigger review and corrective action (clause 3.1.3.1.4).`
-       : a.status==="watch" ? `Flagged early so the hospital can act before a floor is crossed. Bias checks are required under clause 3.1.5.1 and monitoring under 3.1.3.1.3.`
-       : `Monitoring continues weekly.`;
-  }
+  const a=RESULT.bySys[CURRENT], s=a.sys, L=a.latest;
+  $("sdCrumb").textContent=s.name; $("sdName").textContent=s.name;
+  $("sdSub").textContent=`${s.vendor} · ${s.use}`;
+  $("sdStatus").innerHTML=pill(a.status);
+  $("sdFacts").innerHTML=[["Department",esc(s.dept)],["Checked against",esc(s.truth)],["Risk criticality",`${CRIT[s.crit]} (${s.crit})`],["Cases in 12 weeks",a.n.toLocaleString()]].map(([l,v])=>`<div>${l}<b>${v}</b></div>`).join("");
+  const [t1,t2]=findingText(a); const f=$("sdFinding"); f.className="finding "+(a.status==="na"?"ok":a.status);
   f.innerHTML=`<p><b>${t1}</b></p><p>${t2}</p>`;
-  $("sdChartTitle").textContent= s.type==="review"?"Major error rate over 12 weeks":"Sensitivity and specificity over 12 weeks";
-  $("sdChartSub").textContent="Each point uses the four weeks up to that date. Red points are on the wrong side of the floor.";
+  // vendor vs yours
+  const v=mainValue(a), fl=mainFloor(a), isC=s.type==="review", bad=isC?v>fl:v<fl;
+  const claimV = s.claim ? (isC?s.claim.major:s.claim[a.focus]) : null;
+  let ycount="";
+  if(!isC){ ycount = a.focus==="sens" ? `${L.tp} of ${L.tp+L.fn} confirmed ${s.words.pos}` : `${L.tn} of ${L.tn+L.fp} ${s.words.neg}`; }
+  else ycount=`${L.major_error} of ${L.n} reviewed summaries had a major error`;
+  $("cmpBlock").innerHTML=`
+    <div><div class="lab">Vendor reported</div><div class="val">${claimV==null?'<span class="muted" style="font-size:18px">Not applicable</span>':(isC?"under "+pct0(claimV):pct0(claimV))}</div><div class="note">${claimV==null?"Built by the hospital's own team":"From the vendor's own testing before sale"}</div></div>
+    <div><div class="lab">Your hospital, last 4 weeks</div><div class="val ${bad?"bad":""}">${pct(v)}</div><div class="note">${ycount}</div></div>
+    <div><div class="lab">${isC?"Limit":"Floor"} the hospital set</div><div class="val">${pct0(fl)}</div><div class="note">${bad?`${isC?"Above":"Below"} it for ${a.runBelow||1} ${plural(a.runBelow||1,"week","weeks")}`:`${isC?"Below":"Above"} it`}</div></div>`;
+  $("chTitle").textContent=isC?"Major error rate over 12 weeks":"Over 12 weeks";
   $("sdChart").innerHTML=chartSVG(a);
-  $("sdLegend").innerHTML= s.type==="review"
-    ? `<span><i style="background:#0B6B6B"></i>Major error rate</span><span><i style="background:repeating-linear-gradient(90deg,#B07800 0 5px,transparent 5px 9px)"></i>Limit agreed by the hospital</span>`
-    : `<span><i style="background:#0B6B6B"></i>Sensitivity: confirmed cases the AI caught</span><span><i style="background:repeating-linear-gradient(90deg,#7C8B93 0 6px,transparent 6px 10px)"></i>Specificity: negatives correctly left alone</span><span><i style="background:repeating-linear-gradient(90deg,#B07800 0 5px,transparent 5px 9px)"></i>Floors agreed by the hospital</span>`;
-  // workings
-  const L=a.latest;
-  if(s.type==="review"){
-    $("sdCmSub").textContent=`Last four weeks: ${L.n} summaries reviewed.`;
-    $("sdCm").innerHTML=`<div class="cm" style="grid-template-columns:1fr auto"><div class="h">Reviewer's verdict</div><div class="h" style="text-align:right">Summaries</div><div>No error</div><div class="v">${L.ok}</div><div>Minor error, would not change care</div><div class="v">${L.minor_error}</div><div>Major error, could change care</div><div class="v">${L.major_error}</div></div>
-      <p class="calc-line">Major error rate = ${L.major_error} &divide; ${L.n} = <b>${pct(L.major)}</b></p>`;
-    $("sdGroupsSec").style.display="none";
+  $("sdLegend").innerHTML=isC
+    ? `<span><i style="background:#0B6B6B"></i>Major error rate</span><span><i style="background:repeating-linear-gradient(90deg,#A86F00 0 5px,transparent 5px 9px)"></i>Limit set by the hospital</span>`
+    : `<span><i style="background:#0B6B6B"></i>Confirmed ${esc(s.words.pos)} caught (sensitivity)</span><span><i style="background:repeating-linear-gradient(90deg,#8A9AA1 0 6px,transparent 6px 10px)"></i>${esc(s.words.neg[0].toUpperCase()+s.words.neg.slice(1))} left alone (specificity)</span><span><i style="background:repeating-linear-gradient(90deg,#A86F00 0 5px,transparent 5px 9px)"></i>Floors set by the hospital</span>`;
+  // how we know
+  if(isC){
+    $("howBlock").innerHTML=`<h2 style="font-size:16px;margin-bottom:8px">How we know</h2>
+      <p class="big">In the last four weeks, clinicians reviewed <b>${L.n}</b> sampled summaries. <b>${L.major_error}</b> had a major error that could change care, and <b>${L.minor_error}</b> had a minor one.</p>
+      <details class="work"><summary>Show the working</summary><p class="calc">Major error rate = ${L.major_error} &divide; ${L.n} = <b>${pct(L.major)}</b></p></details>
+      <p class="realnote">For AI that writes text, there is no single right answer to compare against, so clinicians review a sample each week. The Standard requires checking AI after go-live whatever kind it is.</p>`;
   } else {
-    $("sdCmSub").textContent=`Last four weeks: ${L.n.toLocaleString()} cases, compared with ${s.truth.toLowerCase()}.`;
-    $("sdCm").innerHTML=`<div class="cm"><div class="h"></div><div class="h">Clinician: condition present</div><div class="h">Clinician: not present</div>
-      <div class="h">AI flagged</div><div class="v">${L.tp}</div><div class="v">${L.fp}</div>
-      <div class="h">AI did not flag</div><div class="v" style="${L.fn?"color:var(--act)":""}">${L.fn}</div><div class="v">${L.tn}</div></div>
-      <p class="calc-line">Sensitivity = ${L.tp} &divide; (${L.tp} + ${L.fn}) = <b>${pct(L.sens)}</b></p>
-      <p class="calc-line">Specificity = ${L.tn} &divide; (${L.tn} + ${L.fp}) = <b>${pct(L.spec)}</b></p>
-      <p class="calc-line">${L.fn} confirmed case${L.fn===1?"":"s"} not flagged by the AI in four weeks.</p>`;
-    $("sdGroupsSec").style.display="";
-    $("sdGroupsSub").textContent=`Sensitivity by group across all 12 weeks (all patients: ${pct(a.all.sens)}). A group is flagged when it is 5 or more points below the other patients, the difference is too large to be chance, and it has at least 30 confirmed cases.`;
-    const colName={age_group:"Age",sex:"Sex",nationality_group:"Nationality group"};
-    $("sdGroups").innerHTML=`<tr><th>Group</th><th class="num">Confirmed cases</th><th class="num">Sensitivity</th><th class="num">Other patients</th><th class="num">Difference</th><th>Result</th></tr>`+
-      a.groups.map(g=>`<tr><td><span class="muted small">${colName[g.col]}:</span> ${g.v==="F"?"Female":g.v==="M"?"Male":esc(g.v)}</td><td class="num">${g.pos}</td><td class="num">${pct(g.sens)}</td><td class="num">${pct(g.restSens)}</td><td class="num">${g.gap==null?"n/a":(g.gap>0?"-":"+")+Math.abs(g.gap*100).toFixed(1)+" pts"}</td><td>${!g.enough?'<span class="muted small">Too few cases to judge</span>':g.flag?'<span class="pill p-watch"><i></i>Below the rest</span>':g.gap>=.05?'<span class="muted small">Could be chance</span>':'<span class="muted small">In line</span>'}</td></tr>`).join("");
+    const w=s.words;
+    $("howBlock").innerHTML=`<h2 style="font-size:16px;margin-bottom:8px">How we know</h2>
+      <p class="big">In the last four weeks, ${esc(w.who)} confirmed <b>${L.tp+L.fn}</b> ${esc(w.pos)}. The AI caught <b>${L.tp}</b> and missed <b class="${L.fn?"below":""}">${L.fn}</b>.</p>
+      <p class="soft" style="margin-top:8px">It also flagged ${L.fp} of ${L.fp+L.tn} ${esc(w.neg)}. Each case is compared with: ${esc(s.truth.toLowerCase())}.</p>
+      <details class="work"><summary>Show the working</summary>
+        <div class="cm"><div class="h"></div><div class="h">Clinician: present</div><div class="h">Clinician: not present</div>
+        <div class="h">AI flagged</div><div class="v">${L.tp}</div><div class="v">${L.fp}</div>
+        <div class="h">AI did not flag</div><div class="v" style="${L.fn?"color:var(--act)":""}">${L.fn}</div><div class="v">${L.tn}</div></div>
+        <p class="calc">Sensitivity = ${L.tp} &divide; (${L.tp} + ${L.fn}) = <b>${pct(L.sens)}</b></p>
+        <p class="calc">Specificity = ${L.tn} &divide; (${L.tn} + ${L.fp}) = <b>${pct(L.spec)}</b></p></details>
+      ${s.id==="stroke"?`<p class="realnote">Real-world reference: published US approval summaries for bleed-detection AI report catching about 93% of bleeds. When Michigan Medicine checked a widely used sepsis tool on its own patients, the vendor had reported 76 to 83% accuracy; the hospital found 63%.</p>`:""}`;
   }
-  $("sdRisks").innerHTML=riskHead()+RISKS.filter(r=>r.sys===CURRENT).map(riskRow).join("");
+  renderFails(a); renderActs(a);
+}
+function bdTable(rows,label,overall){
+  if(!rows||!rows.length) return "";
+  const nm=v=>v==="F"?"Female":v==="M"?"Male":v;
+  return `<div class="tw"><table class="t bd"><thead><tr class="th"><th>${label}</th><th class="num">Confirmed</th><th class="num hide-sm">Missed</th><th>Caught</th><th class="num hide-sm">Other cases</th><th>Verdict</th></tr></thead><tbody>`+
+    rows.map(g=>`<tr><td data-l="${label}">${esc(nm(g.v))}</td><td class="num" data-l="Confirmed cases">${g.pos}</td><td class="num hide-sm" data-l="Missed">${g.missed}</td>
+      <td data-l="Caught"><div class="barcell"><span style="min-width:48px;font-variant-numeric:tabular-nums">${pct(g.sens)}</span><span class="bar"><i class="${g.verdict==="pat"?"bad":""}" style="width:${Math.round((g.sens||0)*100)}%"></i></span></div></td>
+      <td class="num hide-sm" data-l="Other cases">${pct(g.restSens)}</td><td data-l="Verdict"><span class="verdict ${VERD[g.verdict][0]}">${VERD[g.verdict][1]}</span></td></tr>`).join("")+`</tbody></table></div>`;
+}
+function renderFails(a){
+  const s=a.sys;
+  if(s.type==="review"){
+    const A=a.all;
+    $("failBlock").innerHTML=`<div class="callout">For AI that writes text, Sentinel looks at what kind of errors clinicians find in the weekly sample, rather than which cases were missed.</div>
+      <div class="card sec"><div class="fhead"><h3>Errors found in 12 weeks</h3><span>${A.n} summaries reviewed</span></div>
+      <div class="tw"><table class="t"><tbody><tr><td>No error</td><td class="num">${A.ok}</td></tr><tr><td>Minor error, would not change care</td><td class="num">${A.minor_error}</td></tr><tr><td>Major error, could change care</td><td class="num">${A.major_error}</td></tr></tbody></table></div></div>`;
+    return;
+  }
+  const grpRows=a.groups;
+  let html=`<div class="callout">Not just whether ${esc(s.name.toLowerCase())} slipped, but where. Every missed case is lined up with its details, then the same rule decides what counts as a pattern.</div>`;
+  html+=`<div class="fails sec">`;
+  if(a.byType){
+    html+=`<div class="card"><div class="fhead"><h3>By bleed type</h3><span>12 weeks &middot; ${a.all.tp+a.all.fn} confirmed bleeds, ${a.all.fn} missed</span></div>${bdTable(a.byType,"Bleed type")}</div>`;
+    html+=`<div class="card" id="failScanner"><div class="fhead"><h3>By scanner</h3><span>Before and after the protocol update on CT scanner 2</span></div>${bdTable(a.byScanner,"Scanner")}</div>`;
+  }
+  html+=`<div class="card"><div class="fhead"><h3>By patient group</h3><span>12 weeks</span></div>${bdTable(grpRows,"Patient group")}</div>`;
+  html+=`</div>`;
+  html+=`<p class="rule sec"><b>The rule.</b> A group is called a likely pattern only when it has at least 30 confirmed cases, it is at least 5 points below the other cases, and the difference is too large to be chance (a two-proportion test at the 99% level). Misses are rare, so at one hospital most groups stay "too few to judge" for months. Across hospitals using the same tool, the same pattern shows in weeks.</p>`;
+  if(!a.byType) html+=`<p class="small muted" style="margin-top:10px">This sample has no case-type or equipment details for this system. In a hospital, Sentinel reads them from the imaging and record systems the hospital already holds.</p>`;
+  if(a.missedRecent&&a.missedRecent.length){
+    html+=`<div class="card sec"><div class="fhead"><h3>Missed in the last four weeks</h3><span>${a.missedRecent.length} ${esc(s.words.pos)}, no patient details shown</span></div><div class="tw"><table class="t cardify"><thead><tr class="th"><th>Date</th>${a.byType?"<th>Scanner</th><th>Bleed type</th>":""}<th>Age group</th><th>AI said</th><th>${esc(s.truth)}</th></tr></thead><tbody>`+
+      a.missedRecent.map(o=>`<tr><td data-l="Date">${fmtDate(new Date(o.date))}</td>${a.byType?`<td data-l="Scanner">${esc(o.scanner||"")}</td><td data-l="Bleed type">${esc(o.finding_type||"")}</td>`:""}<td data-l="Age group">${esc(o.age_group)}</td><td data-l="AI said">Not flagged</td><td data-l="Clinician">Confirmed</td></tr>`).join("")+`</tbody></table></div></div>`;
+  }
+  $("failBlock").innerHTML=html;
+}
+function renderActs(a){
+  const s=a.sys, rs=riskOf(s.id);
+  let html="";
+  rs.forEach(r=>{ const b=rate(s.crit,r.L,r.I), af=rate(s.crit,r.rL,r.rI), dd=dueDate(r);
+    html+=`<div class="card ${html?"sec":""}" style="overflow:hidden"><div class="fhead"><h3>${r.id} &middot; ${esc(r.risk)}</h3><span>${r.decision}</span></div>
+      <div class="regcard">
+        <div><div class="lab">Before controls</div><span class="score">${b.score}</span>${bandTag(b.band)}<div class="small muted">Likelihood ${r.L} &times; impact ${r.I}</div></div>
+        <div><div class="lab">Controls in place</div><div class="small">${esc(r.controls)}</div></div>
+        <div><div class="lab">After controls</div><span class="score">${af.score}</span>${bandTag(af.band)}<div class="small muted">Likelihood ${r.rL} &times; impact ${r.rI}</div></div>
+        <div><div class="lab">Owner and plan</div><div class="small"><b>${esc(r.owner)}</b><br>${r.plan}${dd?` &middot; ${r.plan==="Completed"?"completed":"due"} ${fmtDate(dd)}`:""}</div></div>
+      </div></div>`; });
+  // timeline
+  const items=[];
+  (s.events||[]).forEach(e=>items.push({d:weekDate(e.week),t:`${e.label}`,c:""}));
+  if(a.status==="act"){ const fw=12-a.runBelow; items.push({d:weekDate(fw),t:`Fell below the ${pct0(mainFloor(a))} floor. Alert raised to the ${rs[0]?esc(rs[0].owner):"risk owner"}.`,c:"red"});
+    if(rs[0]) items.push({d:weekDate(fw),t:`Risk ${rs[0].id} rescored and a treatment plan opened: ${esc(rs[0].controls.toLowerCase())}.`,c:""});
+    items.push({d:RESULT.end,t:`Still below the floor. Included in this week's report pack.`,c:"red"}); }
+  else if(a.status==="watch"){ items.push({d:RESULT.end,t:`Flagged on watch and added to this week's report pack${rs[0]?`; ${esc(rs[0].owner)} notified`:""}.`,c:""}); }
+  else items.push({d:RESULT.end,t:"Checked this week. Within its floors.",c:""});
+  if(rs[0]&&rs[0].plan==="In progress") items.push({d:dueDate(rs[0]),t:`Treatment plan due. ${rs[0].id} stays open in the register until it is completed.`,c:""});
+  items.sort((x,y)=>x.d-y.d);
+  html+=`<div class="twocol"><div class="card pad"><h2 style="font-size:16px;margin-bottom:14px">What happened, automatically</h2><ul class="tl">${items.map(i=>`<li class="${i.c}"><div class="d">${fmtDate(i.d)}</div><div class="x">${i.t}</div></li>`).join("")}</ul></div>
+    <div class="card pad"><h2 style="font-size:16px;margin-bottom:8px">Why it matters</h2><p class="soft" style="font-size:14.5px">The Department of Health's Standard requires each hospital to keep a risk register for every AI system, to act when performance declines, and to report on it. Here those records update as a side effect of the weekly check, not as extra paperwork.</p>
+      <p class="small muted" style="margin-top:10px">Clauses: register 3.3.1.1; monitoring after go-live 3.1.3.1.3; corrective action 3.1.3.1.4; reporting 5.1.</p></div></div>`;
+  $("actBlock").innerHTML=html;
+}
+
+/* ---------------- vendors ---------------- */
+function renderVendors(){
+  const A=RESULT.bySys;
+  const rows=SYSTEMS.map(s=>{ const a=A[s.id], L=a.latest, isC=s.type==="review";
+    const v=mainValue(a), claim=s.claim?(isC?s.claim.major:s.claim[a.focus]):null;
+    const gap=claim==null?null:(isC?v-claim:claim-v);
+    const gapTxt=gap==null?'<span class="muted">n/a</span>':`<span class="${gap>.03?"gap-bad":"gap-ok"}">${(gap*100).toFixed(1)} pts ${isC?"higher":"lower"}</span>`;
+    const apr=isC?null:a.alertsPerReal;
+    const ren=s.renew==null?null:addMonths(s.renew);
+    const step=s.claim==null?"Internal tool: review with the build team":a.status==="act"?"Raise now: ask for revalidation on your scanners":a.status==="watch"?"Raise at the next vendor review":"On track for renewal";
+    return `<tr data-sys="${s.id}" style="cursor:pointer" tabindex="0"><td data-l="Tool" style="min-width:170px"><div class="sname">${esc(s.name)}</div><div class="ssub">${esc(s.vendor)}</div></td>
+      <td class="num" data-l="Vendor reported">${claim==null?'<span class="muted">n/a</span>':(isC?"under "+pct0(claim):pct0(claim))+`<div class="ssub">${mainTech(a).toLowerCase()}</div>`}</td>
+      <td class="num" data-l="Your hospital, 4 weeks"><span class="${(isC?v>mainFloor(a):v<mainFloor(a))?"below":""}">${pct(v)}</span></td>
+      <td class="num" data-l="Gap">${gapTxt}</td>
+      <td class="num" data-l="Alerts per real case">${apr==null?'<span class="muted">n/a</span>':apr.toFixed(1)}</td>
+      <td data-l="Renewal">${ren?monthYear(ren):'<span class="muted">n/a</span>'}</td>
+      <td data-l="Next step">${pill(a.status)}<div class="small" style="margin-top:4px">${step}</div></td></tr>`; }).join("");
+  $("vendTable").innerHTML=`<table class="t cardify"><thead><tr class="th"><th>Tool</th><th class="num">Vendor reported</th><th class="num">Your hospital, 4 weeks</th><th class="num">Gap</th><th class="num">Alerts per real case</th><th>Renewal</th><th>Next step</th></tr></thead><tbody>${rows}</tbody></table>`;
 }
 
 /* ---------------- register ---------------- */
-function liveStatus(id){ const a=RESULT&&RESULT.bySys[id]; return a?pill(a.status):'<span class="muted small">Not monitored</span>'; }
-function riskHead(){ return `<tr><th>ID</th><th>System and risk</th><th class="num">Before controls</th><th>Controls in place</th><th class="num">After controls</th><th>Decision</th><th>Treatment plan</th><th>Owner</th><th>Live status</th></tr>`; }
-function riskRow(r){
-  const s=sysById(r.sys), b=rate(s.crit,r.L,r.I), a=rate(s.crit,r.rL,r.rI);
-  const due=r.due==null?"":(r.plan==="Completed"?"completed "+fmtDate(new Date(utcToday().getTime()+r.due*DAY)):"due "+fmtDate(new Date(utcToday().getTime()+r.due*DAY)));
-  return `<tr><td style="font-weight:700;white-space:nowrap">${r.id}</td>
-   <td style="min-width:220px"><div class="sname">${esc(s.name)}</div><div class="small" style="color:var(--soft)">${esc(r.risk)}</div></td>
-   <td class="num" style="white-space:nowrap"><div style="font-size:18px;font-weight:700">${b.score}</div>${bandTag(b.band)}<div class="muted small">L${r.L} &times; I${r.I} = ${b.ef}</div></td>
-   <td class="small" style="min-width:200px;color:var(--soft)">${esc(r.controls)}</td>
-   <td class="num" style="white-space:nowrap"><div style="font-size:18px;font-weight:700">${a.score}</div>${bandTag(a.band)}<div class="muted small">L${r.rL} &times; I${r.rI} = ${a.ef}</div></td>
-   <td>${r.decision}</td>
-   <td style="white-space:nowrap">${r.plan}<div class="muted small">${due}</div></td>
-   <td class="small" style="min-width:120px">${esc(r.owner)}</td>
-   <td>${liveStatus(r.sys)}</td></tr>`;
-}
 function kpis(){
   const hv=RISKS.filter(r=>{ const b=rate(sysById(r.sys).crit,r.L,r.I).band; return b==="H"||b==="VH"; });
   const done=hv.filter(r=>r.plan==="Completed").length;
   const eth=INCIDENTS.filter(i=>/ethical/i.test(i.kind)).length;
-  return {hv:hv.length,done,k1:hv.length?done/hv.length:null,eth,k2:eth/DEPLOYED_USE_CASES};
+  return {hv:hv.length,done,k1:hv.length?done/hv.length:null,eth,k2:eth/useCases()};
 }
+function liveStatus(id){ const a=RESULT&&RESULT.bySys[id]; return a?pill(a.status):'<span class="muted small">Not monitored</span>'; }
 function renderRegister(){
   const k=kpis();
-  $("kpis").innerHTML=`
-   <div class="kpi"><h3>Treatment plans completed for High and Very high risks</h3><div class="row"><span class="big ${k.k1<1?"below":""}">${pct(k.k1,0)}</span><span class="tgt">DoH target: 100%, yearly</span></div><p>${k.done} of ${k.hv} risks rated High before controls have a completed plan. The rest are in progress, with due dates below.</p></div>
-   <div class="kpi"><h3>AI ethical incident rate</h3><div class="row"><span class="big">${pct(k.k2,1)}</span><span class="tgt">DoH threshold: below 15%, yearly</span></div><p>${k.eth} ethical incident or near miss logged &divide; ${DEPLOYED_USE_CASES} AI use cases in operation &times; 100.</p></div>`;
-  $("regTable").innerHTML=riskHead()+RISKS.map(riskRow).join("");
+  $("kline").innerHTML=`<div class="card"><div class="lab">Treatment plans completed for High and Very high risks</div><div class="val ${k.k1<1?"near":""}">${pct0(k.k1)}<small>${k.done} of ${k.hv} &middot; DoH target 100%, yearly</small></div></div>
+    <div class="card"><div class="lab">AI ethical incident rate</div><div class="val">${pct(k.k2)}<small>${k.eth} of ${useCases()} AI use cases &middot; DoH threshold below 15%, yearly</small></div></div>`;
+  $("regTable").innerHTML=`<thead><tr class="th"><th>ID</th><th>System and risk</th><th class="num">Before controls</th><th>Controls in place</th><th class="num">After controls</th><th>Owner and plan</th><th>Live status</th></tr></thead><tbody>`+
+    RISKS.map(r=>{ const s=sysById(r.sys), b=rate(s.crit,r.L,r.I), a=rate(s.crit,r.rL,r.rI), dd=dueDate(r);
+      return `<tr class="${r.isNew?"new":""}"><td data-l="ID" style="font-weight:700;white-space:nowrap">${r.id}</td>
+       <td data-l="System and risk" style="min-width:210px"><div class="sname">${esc(s.name)}</div><div class="ssub">${esc(r.risk)}</div></td>
+       <td class="num" data-l="Before controls"><span class="score" style="font-size:17px">${b.score}</span>${bandTag(b.band)}</td>
+       <td data-l="Controls in place" class="small soft" style="min-width:190px">${esc(r.controls)}</td>
+       <td class="num" data-l="After controls"><span class="score" style="font-size:17px">${a.score}</span>${bandTag(a.band)}</td>
+       <td data-l="Owner and plan" class="small" style="min-width:150px"><b>${esc(r.owner)}</b><br>${r.plan}${dd?`<span class="muted"> &middot; ${r.plan==="Completed"?"done":"due"} ${fmtDate(dd)}</span>`:""}</td>
+       <td data-l="Live status">${liveStatus(r.sys)}</td></tr>`; }).join("")+`</tbody>`;
 }
 
-/* ---------------- calculator ---------------- */
-let cC=3,cLv=4,cIv=5;
+/* add-system drawer (the DoH calculator) */
+let cC=3,cLv=3,cIv=4;
 function segBtns(el,vals,cur,labels,set){
-  el.innerHTML=vals.map(v=>`<button type="button" data-v="${v}" class="${v===cur?"on":""}" aria-pressed="${v===cur}">${v}<small>${labels[v]}</small></button>`).join("");
+  el.innerHTML=vals.map(v=>`<button type="button" data-v="${v}" class="${v===cur?"on":""}" aria-pressed="${v===cur}">${v} &middot; ${labels[v]}</button>`).join("");
   el.querySelectorAll("button").forEach(b=>b.onclick=()=>{ set(+b.dataset.v); renderCalc(); });
 }
 function renderCalc(){
@@ -769,51 +1029,72 @@ function renderCalc(){
   segBtns($("cI"),[1,2,3,4,5],cIv,IMP,v=>cIv=v);
   $("cCritHint").textContent=CRIT_HINT[cC];
   const r=rate(cC,cLv,cIv);
-  $("cSteps").innerHTML=`<li>Exposure = likelihood &times; impact = ${cLv} &times; ${cIv} = <b>${r.ef}</b></li>
-    <li>${r.ef} falls in the <b>${BANDCOL[r.b]}</b> exposure band (${["","1 to 3","4 to 6","7 to 12","13 to 20","21 and above"][r.b]})</li>
-    <li>Row <b>${CRIT[cC]} (${cC})</b>, column <b>${BANDCOL[r.b]} (${r.b})</b> in the table gives <b>${r.score}</b></li>`;
-  let h=`<tr><th></th>${[5,4,3,2,1].map(b=>`<th>${BANDCOL[b]}<br>(${b})</th>`).join("")}</tr>`;
-  for(const c of [4,3,2,1]){ h+=`<tr><th class="r">${CRIT[c]} (${c})</th>${[5,4,3,2,1].map(b=>{ const [n,bd]=TABLE[c][b]; return `<td class="${bd}${c===cC&&b===r.b?" hit":""}">${n}</td>`; }).join("")}</tr>`; }
-  $("cMx").innerHTML=h;
-  $("cResult").innerHTML=`<div class="score">${r.score}</div><div style="margin:8px 0 6px">${bandTag(r.band)}</div><p style="margin:0;color:var(--ink)">${TREAT[r.band]}</p>
-   <p class="muted small" style="margin-top:10px">${r.band==="H"?"Under the Standard, a High risk also needs conformity assessments before and after deployment, coordinated with the Department of Health (clause 3.3.1.2.2.2).":r.band==="VH"?"Under the Standard, systems with Very high residual risk must not be deployed (clause 3.3.1.2.2.1).":"The band comes from the table's colours, not from the number alone."}</p>`;
+  let h=`<tr><th></th>${[5,4,3,2,1].map(b=>`<th>${BANDCOL[b]}</th>`).join("")}</tr>`;
+  for(const c of [4,3,2,1]){ h+=`<tr><th class="r">${CRIT[c]}</th>${[5,4,3,2,1].map(b=>{ const [n,bd]=TABLE[c][b]; return `<td class="${bd}${c===cC&&b===r.b?" hit":""}">${n}</td>`; }).join("")}</tr>`; }
+  $("cResult").innerHTML=`<div style="display:flex;align-items:center;gap:10px"><span class="score" style="font-size:28px">${r.score}</span>${bandTag(r.band)}<span class="small soft">${TREAT[r.band]}</span></div>
+    <ol class="steps"><li>Exposure = likelihood &times; impact = ${cLv} &times; ${cIv} = <b>${r.ef}</b>, in the ${BANDCOL[r.b]} band</li><li>Row ${CRIT[cC]}, column ${BANDCOL[r.b]} in the Department of Health's table gives <b>${r.score}</b></li></ol>
+    <table class="mx" aria-label="Risk rating table">${h}</table>
+    <p class="small muted" style="margin-top:8px">${r.band==="H"?"A High risk must be treated. If it stays High after controls, it needs assessments with the Department of Health before and after go-live (clause 3.3.1.2.2.2).":r.band==="VH"?"If it stays Very high after controls, the system must not be used (clause 3.3.1.2.2.1).":"The band comes from the table's colours, not from the number alone."}</p>`;
+}
+function openDrawer(){ renderCalc(); $("scrim").classList.add("on"); $("drawer").classList.add("on"); setTimeout(()=>$("dName").focus(),150); }
+function closeDrawer(){ $("scrim").classList.remove("on"); $("drawer").classList.remove("on"); }
+function addSystem(){
+  const name=($("dName").value||"").trim()||"New AI system";
+  const id="new"+(ADDED.length+1), rid="R-"+String(RISKS.length+1).padStart(2,"0");
+  ADDED.push({id,name,vendor:"To be confirmed",use:"Added just now",crit:cC});
+  RISKS.push({id:rid,sys:id,risk:"Initial assessment",L:cLv,I:cIv,controls:"To be agreed",rL:cLv,rI:cIv,decision:"To be decided",owner:"To be assigned",plan:"Not started",due:null,isNew:true});
+  closeDrawer(); renderAll(); show("register");
 }
 
-/* ---------------- report ---------------- */
-function renderReport(){
+/* ---------------- reports ---------------- */
+function renderReports(){
+  const A=RESULT.bySys, k=kpis(), st=SYSTEMS.map(s=>A[s.id].status), n=c=>st.filter(x=>x===c).length;
+  const open=RISKS.filter(r=>r.plan==="In progress"||r.plan==="Not started");
+  $("repLead").textContent=`Covers the 12 weeks from ${fmtDate(RESULT.start)} to ${fmtDate(RESULT.end)}, ready for internal sign-off and reporting to the Department of Health.`;
+  $("repGrid").innerHTML=[
+    ["AI systems",`${ALLSYS().length}`,`${SYSTEMS.length} checked weekly; ${n("act")} need action, ${n("watch")} on watch`],
+    ["High-risk treatment plans completed",pct0(k.k1),`${k.done} of ${k.hv}. DoH target: 100%, yearly`],
+    ["AI ethical incident rate",pct(k.k2),`${k.eth} of ${useCases()} use cases. DoH threshold: below 15%`],
+    ["Open treatment plans",`${open.length}`,"Each with an owner and a due date"]
+  ].map(([l,v,s])=>`<div class="card"><div class="lab">${l}</div><div class="val">${v}</div><div class="small muted">${s}</div></div>`).join("");
+  $("repActs").innerHTML=`<thead><tr class="th"><th>ID</th><th>System and risk</th><th>Owner</th><th>Due</th><th>Live status</th></tr></thead><tbody>`+
+    (open.length?open.map(r=>{ const s=sysById(r.sys), dd=dueDate(r); return `<tr><td data-l="ID" style="font-weight:700">${r.id}</td><td data-l="System and risk"><div class="sname">${esc(s.name)}</div><div class="ssub">${esc(r.risk)}</div></td><td data-l="Owner">${esc(r.owner)}</td><td data-l="Due">${dd?fmtDate(dd):"To be set"}</td><td data-l="Live status">${liveStatus(r.sys)}</td></tr>`; }).join(""):`<tr><td colspan="5">None open</td></tr>`)+`</tbody>`;
+  renderDoc();
+}
+function renderDoc(){
   const A=RESULT.bySys, k=kpis(), today=utcToday();
   const sysRows=SYSTEMS.map(s=>{ const a=A[s.id], L=a.latest;
-    const fig= s.type==="review" ? `Major error rate ${pct(L.major)} (limit ${pct(s.ceiling,0)})` : `Sensitivity ${pct(L.sens)} (floor ${pct(s.floors.sens,0)}); specificity ${pct(L.spec)} (floor ${pct(s.floors.spec,0)})`;
+    const fig= s.type==="review" ? `Major error rate ${pct(L.major)} (limit ${pct0(s.ceiling)})` : `Sensitivity ${pct(L.sens)} (floor ${pct0(s.floors.sens)}); specificity ${pct(L.spec)} (floor ${pct0(s.floors.spec)})`;
     return `<tr><td><b>${esc(s.name)}</b><br><span class="muted">${esc(s.vendor)}</span></td><td>${CRIT[s.crit]}</td><td>${fig}</td><td>${STATUS[a.status][1]}</td></tr>`; }).join("");
-  const otherRows=OTHER.map(s=>`<tr><td><b>${esc(s.name)}</b><br><span class="muted">${esc(s.vendor)}</span></td><td>${CRIT[s.crit]}</td><td>Register entry only</td><td>Not monitored</td></tr>`).join("");
+  const otherRows=OTHER.concat(ADDED).map(s=>`<tr><td><b>${esc(s.name)}</b><br><span class="muted">${esc(s.vendor)}</span></td><td>${CRIT[s.crit]}</td><td>Register entry only</td><td>Not monitored</td></tr>`).join("");
   const biasRows=SYSTEMS.filter(s=>s.type==="binary").map(s=>{ const a=A[s.id]; return `<tr><td>${esc(s.name)}</td><td>${a.flagged.length?a.flagged.map(g=>`${esc(g.v)}: ${pct(g.sens)} against ${pct(g.restSens)} for other patients`).join("; "):"None found"}</td></tr>`; }).join("");
   const riskRows=RISKS.map(r=>{ const s=sysById(r.sys), b=rate(s.crit,r.L,r.I), a=rate(s.crit,r.rL,r.rI);
     return `<tr><td style="white-space:nowrap"><b>${r.id}</b></td><td>${esc(s.name)}: ${esc(r.risk)}</td><td>${b.score} ${BANDNAME[b.band]}</td><td>${a.score} ${BANDNAME[a.band]}</td><td>${r.decision}</td><td>${r.plan}</td><td>${esc(r.owner)}</td></tr>`; }).join("");
   const actRows=SYSTEMS.filter(s=>A[s.id].status==="act"||A[s.id].status==="watch").map(s=>{ const r=RISKS.find(x=>x.sys===s.id); return `<tr><td>${esc(s.name)}</td><td>${STATUS[A[s.id].status][1]}</td><td>${r?esc(r.controls):"To be decided"}</td><td>${r?r.id:""}</td></tr>`; }).join("");
   const incRows=INCIDENTS.map(i=>`<tr><td>${fmtDate(new Date(today.getTime()-i.weekAgo*7*DAY))}</td><td>${esc(sysById(i.sys).name)}</td><td>${esc(i.kind)}</td><td>${esc(i.text)}</td><td>${esc(i.action)}</td></tr>`).join("");
   $("doc").innerHTML=`
-   <div class="dh"><div><div class="ent">${HOSPITAL}</div><div class="muted small">Licensed healthcare facility, Abu Dhabi</div></div>
+   <div class="dhd"><div><div class="ent">${HOSPITAL}</div><div class="muted small">Licensed healthcare facility, Abu Dhabi</div></div>
      <div class="meta"><div><b>Document:</b> AI governance report pack</div><div><b>Period:</b> ${fmtDate(RESULT.start)} to ${fmtDate(RESULT.end)}</div><div><b>Prepared:</b> ${fmtDate(today)}</div><div><b>Data:</b> ${esc(SOURCE.name)}</div></div></div>
-   <h2 class="t">AI governance report pack</h2><div class="st">Demonstration only. Fictional hospital, made-up data.</div>
+   <h2 class="tt">AI governance report pack</h2><div class="stt">Demonstration only. Fictional hospital, made-up data.</div>
    <section><h3>1. Basis</h3><p>Prepared under the Department of Health Abu Dhabi Responsible AI Standard (DoH/ST/DDGO/RAI/V1/2025) and its Responsible AI Risk Management Protocol (DoH/Protocol/DDGO/RALRM/V1/2025), both effective October 2025. It covers every AI system in use at the facility and supports the facility's periodic reporting of compliance status, deviations and risks to the Department (Standard, clause 5.1).</p></section>
    <section><h3>2. AI systems in use <span class="ref">Standard 3.3.1.1</span></h3><div class="tw"><table><tr><th>System</th><th>Criticality</th><th>Latest four weeks</th><th>Status</th></tr>${sysRows}${otherRows}</table></div></section>
    <section><h3>3. Performance monitoring after go-live <span class="ref">Standard 3.1.2.1.4, 3.1.3.1.3</span></h3><p>Each monitored system is compared weekly with the clinician's confirmed finding, using a four-week window, against floors agreed by the facility. ${(n=>n===0?"No system":n===1?"One system":n+" systems")(SYSTEMS.filter(s=>A[s.id].status==="act").length)} fell below a floor in the period.</p></section>
    <section><h3>4. Bias checks <span class="ref">Standard 3.1.5.1</span></h3><div class="tw"><table><tr><th>System</th><th>Patient groups below the rest (12 weeks)</th></tr>${biasRows}</table></div></section>
    <section><h3>5. Risk register <span class="ref">Standard 3.3.1; Protocol section 3</span></h3><div class="tw"><table><tr><th>ID</th><th>Risk</th><th>Before controls</th><th>After controls</th><th>Decision</th><th>Plan</th><th>Owner</th></tr>${riskRows}</table></div></section>
    <section><h3>6. Indicators <span class="ref">Protocol KPI table</span></h3><div class="tw"><table><tr><th>Indicator</th><th>Value</th><th>Threshold</th><th>Status</th></tr>
-     <tr><td>Treatment plans completed for High and Very high risks</td><td>${pct(k.k1,0)} (${k.done} of ${k.hv})</td><td>100%</td><td>${k.k1>=1?"Met":"Not yet met"}</td></tr>
-     <tr><td>AI ethical incident rate</td><td>${pct(k.k2,1)} (${k.eth} of ${DEPLOYED_USE_CASES})</td><td>Below 15%</td><td>${k.k2<.15?"Met":"Not met"}</td></tr></table></div><p class="muted small" style="margin-top:6px">Both indicators are set as yearly measures. Values shown are for the year to date.</p></section>
+     <tr><td>Treatment plans completed for High and Very high risks</td><td>${pct0(k.k1)} (${k.done} of ${k.hv})</td><td>100%</td><td>${k.k1>=1?"Met":"Not yet met"}</td></tr>
+     <tr><td>AI ethical incident rate</td><td>${pct(k.k2)} (${k.eth} of ${useCases()})</td><td>Below 15%</td><td>${k.k2<.15?"Met":"Not met"}</td></tr></table></div><p class="muted small" style="margin-top:6px">Both indicators are yearly measures. Values shown are for the year to date.</p></section>
    <section><h3>7. Corrective actions <span class="ref">Standard 3.1.3.1.4</span></h3><div class="tw"><table><tr><th>System</th><th>Status</th><th>Action</th><th>Register</th></tr>${actRows||'<tr><td colspan="4">None in the period</td></tr>'}</table></div></section>
    <section><h3>8. Incidents and near misses <span class="ref">Standard 3.1.7.1.2; Protocol KPI 2</span></h3><div class="tw"><table><tr><th>Date</th><th>System</th><th>Type</th><th>What happened</th><th>Action</th></tr>${incRows}</table></div></section>
    <section><h3>9. How this was produced</h3><p>Figures were calculated by Sentinel from records held by the facility: each AI system's output and the clinician's finding for the same case. Sentinel has no commercial link with the AI suppliers named. Risk scores, controls and decisions are entered by the facility's risk owners. This pack is the facility's own record and is not an audit opinion.</p></section>
    <div class="sig"><div><b>Quality Director</b>Name and date</div><div><b>AI Governance Lead</b>Name and date</div></div>`;
 }
 
-/* ---------------- data view ---------------- */
-function renderData(){
-  $("dataNow").innerHTML=`Now showing: <b>${esc(SOURCE.name)}</b>, ${DATA.length.toLocaleString()} cases from ${fmtDate(RESULT.start)} to ${fmtDate(RESULT.end)}.${SOURCE.sample?"":` <button class="linkbtn" onclick="resetSample()">Go back to the sample</button>`}`;
+/* ---------------- about ---------------- */
+function renderAbout(){
+  $("dataNow").innerHTML=`Now showing: <b>${esc(SOURCE.name)}</b>, ${DATA.length.toLocaleString()} cases from ${fmtDate(RESULT.start)} to ${fmtDate(RESULT.end)}.`;
+  $("resetBtn").style.display=SOURCE.sample?"none":"";
 }
-let SAMPLE=null;
 function resetSample(){ load(SAMPLE,{name:"Built-in sample file",sample:true}); $("loadMsg").innerHTML=`<div class="msg">Back on the built-in sample.</div>`; }
 function handleFile(f){
   if(!f) return;
@@ -824,29 +1105,78 @@ function handleFile(f){
     if(res.error){ $("loadMsg").innerHTML=`<div class="msg err">${esc(res.error)}</div>`; return; }
     if(!res.rows.length){ $("loadMsg").innerHTML=`<div class="msg err">No usable rows found. ${res.bad.length?`First problem, line ${res.bad[0].line}: ${esc(res.bad[0].why)}.`:""}</div>`; return; }
     load(res.rows,{name:f.name,sample:false});
-    const by=SYSTEMS.map(s=>`${s.name}: ${RESULT.bySys[s.id].n}`).join(", ");
-    $("loadMsg").innerHTML=`<div class="msg">Loaded <b>${esc(f.name)}</b>: ${res.rows.length.toLocaleString()} rows used${res.bad.length?`, ${res.bad.length} skipped (first problem, line ${res.bad[0].line}: ${esc(res.bad[0].why)})`:""}. Every page has been recalculated. Cases in the last 12 weeks: ${by}.</div>`;
+    $("loadMsg").innerHTML=`<div class="msg">Loaded <b>${esc(f.name)}</b>: ${res.rows.length.toLocaleString()} rows used${res.bad.length?`, ${res.bad.length} skipped (first problem, line ${res.bad[0].line}: ${esc(res.bad[0].why)})`:""}. Every page has been recalculated.</div>`;
   };
   rd.readAsText(f);
 }
 
 /* ---------------- navigation ---------------- */
 function show(v){
+  VIEW=v;
   document.querySelectorAll(".view").forEach(x=>x.classList.toggle("on",x.id==="view-"+v));
-  document.querySelectorAll("nav.tabs button").forEach(b=>{ b.classList.toggle("on",b.dataset.v===v); b.setAttribute("aria-selected",b.dataset.v===v); });
+  const navV=v==="system"?"systems":v;
+  document.querySelectorAll("#nav button[data-v], .side .foot button[data-v], #bnav button").forEach(b=>b.classList.toggle("on",b.dataset.v===navV));
   try{ history.replaceState(null,"","#"+v+(v==="system"?"-"+CURRENT:"")); }catch(e){}
-  window.scrollTo(0,0);
+  if(!TOUR.on) window.scrollTo(0,0);
 }
-function openSystem(id){ CURRENT=id; show("system"); renderSystem(); }
-function renderAll(){ renderOverview(); renderSystem(); renderRegister(); renderReport(); renderData(); }
+function setTab(t){ STAB=t; document.querySelectorAll("#sdTabs button").forEach(b=>{ b.classList.toggle("on",b.dataset.t===t); b.setAttribute("aria-selected",b.dataset.t===t); }); document.querySelectorAll(".stab").forEach(x=>x.classList.toggle("on",x.id==="t-"+t)); if(t==="perf") $("sdChart").innerHTML=chartSVG(RESULT.bySys[CURRENT]); }
+function openSystem(id,tab){ CURRENT=id; show("system"); renderSystem(); setTab(tab||"perf"); }
+function renderAll(){ renderHome(); renderSystems(); renderSystem(); renderVendors(); renderRegister(); renderReports(); renderAbout(); }
 
-document.querySelectorAll("nav.tabs button").forEach(b=>b.onclick=()=>show(b.dataset.v));
-document.addEventListener("click",e=>{ const j=e.target.closest("[data-jump]"); if(j) show(j.dataset.jump); const r=e.target.closest("tr[data-sys]"); if(r) openSystem(r.dataset.sys); });
-document.addEventListener("keydown",e=>{ if((e.key==="Enter"||e.key===" ")&&e.target.matches&&e.target.matches("tr[data-sys]")){ e.preventDefault(); openSystem(e.target.dataset.sys); } });
-$("sdPick").onchange=e=>openSystem(e.target.value);
-$("introGo").onclick=()=>{ const s=SYSTEMS.find(x=>RESULT.bySys[x.id].status==="act")||SYSTEMS[0]; openSystem(s.id); };
-$("introClose").onclick=()=>{ $("intro").style.display="none"; try{ localStorage.setItem("sentinelIntroHidden","1"); }catch(e){} };
-try{ if(localStorage.getItem("sentinelIntroHidden")==="1") $("intro").style.display="none"; }catch(e){}
+/* ---------------- tour ---------------- */
+const STEPS=[
+  {title:"Day one: list every AI system",text:"The hospital starts by listing its AI systems and owners. Sentinel scores each one on the Department of Health's risk table. No patient data is involved, so this step is quick to approve.",go:()=>show("register"),el:"regWrap"},
+  {title:"Every AI system, checked every week",text:"Each week, Sentinel compares what each AI said with what the hospital's own clinicians concluded. One system needs action and two are on watch.",go:()=>show("home"),el:"homeCards"},
+  {title:"The vendor said 93%. On your patients, 82.7%.",text:"The stroke tool's figure from the vendor's testing, next to how it performs on this hospital's patients now. This is the evidence a vendor cannot give you.",go:()=>openSystem("stroke","perf"),el:"cmpBlock"},
+  {title:"Where it is failing, honestly sized",text:"Every missed bleed is lined up with its scanner and bleed type. The misses cluster on CT scanner 2 after its protocol update. Other groups are in line, could be chance, or have too few cases to judge yet, and the demo says so.",go:()=>openSystem("stroke","fails"),el:"failScanner"},
+  {title:"The paperwork updates itself",text:"The risk register entry, its owner, the treatment plan and the Standard's clause are kept current as a side effect of the weekly check.",go:()=>openSystem("stroke","acts"),el:"actBlock"},
+  {title:"Compare vendors, then report to the regulator",text:"One scorecard across vendors: what each reported, what you see, and how many alerts staff check for each real case. The report pack for the Department of Health is one click away under Reports.",go:()=>show("vendors"),el:"vendTable"}
+];
+const TOUR={on:false,i:0};
+function hlClear(){ document.querySelectorAll(".hl").forEach(x=>x.classList.remove("hl")); }
+function tourGo(i){
+  TOUR.i=i; TOUR.on=true; hlClear();
+  const st=STEPS[i]; st.go();
+  $("tour").classList.add("on");
+  $("tStep").textContent=`Step ${i+1} of ${STEPS.length}`;
+  $("tTitle").textContent=st.title; $("tText").textContent=st.text;
+  $("tDots").innerHTML=STEPS.map((_,k)=>`<i class="${k===i?"on":""}"></i>`).join("");
+  $("tBack").style.visibility=i?"visible":"hidden";
+  $("tNext").textContent=i===STEPS.length-1?"Finish":"Next";
+  const el=$(st.el);
+  requestAnimationFrame(()=>{ el.classList.add("hl"); const r=el.getBoundingClientRect(); const top=window.scrollY+r.top-(window.innerWidth<860?70:110); window.scrollTo({top:Math.max(0,top),behavior:"smooth"}); });
+}
+function tourEnd(final){
+  hlClear(); TOUR.on=false;
+  if(final){
+    $("tStep").textContent="That's Sentinel";
+    $("tTitle").textContent="Explore on your own";
+    $("tText").textContent="Open any system, add one to the register, or download the sample file from About this demo, change it, and load it back to watch every page recalculate.";
+    $("tDots").innerHTML=""; $("tBack").style.visibility="hidden"; $("tNext").textContent="Close";
+    TOUR.done=true; return;
+  }
+  $("tour").classList.remove("on"); TOUR.done=false;
+}
+function startTour(){ $("welcome").classList.remove("on"); try{ localStorage.setItem("sentinelSeen2","1"); }catch(e){} tourGo(0); }
+
+/* ---------------- wiring ---------------- */
+document.addEventListener("click",e=>{
+  const t=e.target.closest("[data-tour]"); if(t){ startTour(); return; }
+  const v=e.target.closest("[data-v]"); if(v&&!v.closest("#sdTabs")){ if(TOUR.on) tourEnd(false); show(v.dataset.v); return; }
+  const s=e.target.closest("[data-sys]"); if(s){ if(TOUR.on) tourEnd(false); openSystem(s.dataset.sys); return; }
+});
+document.addEventListener("keydown",e=>{
+  if((e.key==="Enter"||e.key===" ")&&e.target.matches&&e.target.matches("[data-sys]")){ e.preventDefault(); openSystem(e.target.dataset.sys); }
+  if(e.key==="Escape"){ if($("drawer").classList.contains("on")) closeDrawer(); else if($("tour").classList.contains("on")) tourEnd(false); }
+});
+$("sdTabs").addEventListener("click",e=>{ const b=e.target.closest("button[data-t]"); if(b) setTab(b.dataset.t); });
+$("tNext").onclick=()=>{ if(TOUR.done){ tourEnd(false); return; } if(TOUR.i<STEPS.length-1) tourGo(TOUR.i+1); else tourEnd(true); };
+$("tBack").onclick=()=>{ if(TOUR.i>0) tourGo(TOUR.i-1); };
+$("tClose").onclick=()=>tourEnd(false);
+$("wTour").onclick=startTour;
+$("wSkip").onclick=()=>{ $("welcome").classList.remove("on"); try{ localStorage.setItem("sentinelSeen2","1"); }catch(e){} };
+$("addBtn").onclick=openDrawer; $("dClose").onclick=closeDrawer; $("dCancel").onclick=closeDrawer; $("scrim").onclick=closeDrawer; $("dAdd").onclick=addSystem;
+$("docToggle").onclick=()=>{ const w=$("docWrap"), on=w.style.display==="none"; w.style.display=on?"":"none"; $("docToggle").textContent=on?"Hide the full report pack":"Show the full report pack"; if(on) w.scrollIntoView({behavior:"smooth"}); };
 $("printBtn").onclick=()=>window.print();
 $("dlBtn").onclick=()=>{ const blob=new Blob([toCSV(SAMPLE)],{type:"text/csv"}); const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download="sentinel-sample-cases.csv"; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href),1000); };
 $("resetBtn").onclick=resetSample;
@@ -858,14 +1188,20 @@ file.onchange=()=>{ handleFile(file.files[0]); file.value=""; };
 ["dragleave","drop"].forEach(ev=>drop.addEventListener(ev,e=>{ e.preventDefault(); drop.classList.remove("over"); }));
 drop.addEventListener("drop",e=>handleFile(e.dataTransfer.files[0]));
 window.addEventListener("dragover",e=>e.preventDefault()); window.addEventListener("drop",e=>e.preventDefault());
-window.addEventListener("beforeprint",()=>{ renderReport(); });
-let rsz; window.addEventListener("resize",()=>{ clearTimeout(rsz); rsz=setTimeout(()=>{ if($("view-system").classList.contains("on")) $("sdChart").innerHTML=chartSVG(RESULT.bySys[CURRENT]); },150); });
+let rsz; window.addEventListener("resize",()=>{ clearTimeout(rsz); rsz=setTimeout(()=>{ if(VIEW==="system"&&STAB==="perf") $("sdChart").innerHTML=chartSVG(RESULT.bySys[CURRENT]); },150); });
 
 /* ---------------- start ---------------- */
 SAMPLE=generateSample();
 load(SAMPLE,{name:"Built-in sample file",sample:true});
-renderCalc();
-(function(){ const h=(location.hash||"").slice(1); if(!h) return; const [v,id]=h.split("-"); if(v==="system"&&id&&SYSTEMS.some(s=>s.id===id)) openSystem(id); else if(document.getElementById("view-"+v)) show(v); })();
+(function route(){
+  const h=(location.hash||"").slice(1);
+  if(h.startsWith("system-")&&RESULT.bySys[h.slice(7)]) openSystem(h.slice(7));
+  else if(["home","systems","vendors","register","reports","about"].includes(h)) show(h);
+  else show("home");
+  let seen=false; try{ seen=localStorage.getItem("sentinelSeen2")==="1"; }catch(e){}
+  if(h==="tour") startTour(); else if(!seen&&!h) $("welcome").classList.add("on");
+})();
+
 </script>
 </body>
 </html>
