@@ -417,7 +417,7 @@ function rate(crit,L,I){ const ef=L*I, b=exposureBand(ef), c=TABLE[crit][b]; ret
 
 const SYSTEMS = [
   {id:"stroke",name:"Stroke detection",vendor:"Vendor A",use:"Flags suspected bleeding on head CT scans",dept:"Radiology",crit:3,type:"binary",
-   floors:{sens:.90,spec:.85},truth:"Neuroradiologist's final report",events:[{week:6,label:"CT scanner protocol updated"}],
+   floors:{sens:.90,spec:.85},truth:"Neuroradiologist's final report",events:[{week:5,label:"CT scanner protocol updated"}],
    gen:{n:60,p:.22,sens:w=>w<5?.94:.94-(w-4)*.02,spec:()=>.93,mod:{age_group:{"65+":-.04}}}},
   {id:"chest",name:"Chest X-ray triage",vendor:"Vendor B",use:"Moves chest X-rays with likely abnormal findings up the reading list",dept:"Radiology",crit:3,type:"binary",
    floors:{sens:.88,spec:.85},truth:"Radiologist's final report",events:[],
