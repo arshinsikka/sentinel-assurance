@@ -1,8 +1,11 @@
-# Sentinel — Clinical AI Assurance (Mockup)
+# Sentinel demo
 
-A demonstration prototype of an independent assurance layer for clinical AI in Abu Dhabi hospitals, aligned to the DoH Responsible AI Risk Management Protocol.
+A working demo of Sentinel, an independent check on the clinical AI used in Abu Dhabi hospitals.
 
-This is a visual mockup using synthetic data — not a production system. Built as a validation prop and concept demonstration.
+Live: https://arshinsikka.github.io/sentinel-assurance/assurance-mockup.html
 
-## Running
-Open `assurance-mockup.html` by double-clicking it, or right-click → Open with → your browser. No build step or dependencies required.
+- Every figure is calculated in the browser from a sample file of made-up cases (what each AI system said, and what the clinician later concluded). Nothing is sent anywhere.
+- Download the sample file from "Data and method", edit it, and load it back to see every page recalculate.
+- Risk scoring follows the Department of Health Abu Dhabi Responsible AI Standard and Risk Management Protocol (October 2025), including the Protocol's risk rating table.
+
+Example General Hospital is fictional, vendor names are placeholders, and all data is made up.
